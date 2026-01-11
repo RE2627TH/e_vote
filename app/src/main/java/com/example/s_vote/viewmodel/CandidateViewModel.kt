@@ -187,4 +187,25 @@ class CandidateViewModel : ViewModel() {
             }
         }
     }
+
+    fun submitFeedback(candidateId: String, userName: String, rating: Int, comment: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = com.example.s_vote.model.FeedbackRequest(candidateId, userName, rating, comment)
+                val response = RetrofitInstance.api.submitFeedback(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    onResult(true, response.body()?.message ?: "Success")
+                    // Refresh candidates to show new feedback if applicable
+                    fetchCandidates() 
+                } else {
+                    onResult(false, response.body()?.message ?: "Failed")
+                }
+            } catch (e: Exception) {
+                onResult(false, e.message ?: "Error")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }
