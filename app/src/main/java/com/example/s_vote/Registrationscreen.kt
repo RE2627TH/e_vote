@@ -3,6 +3,7 @@ package com.example.s_vote
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,7 +108,39 @@ fun RegistrationScreen(navController: NavController) {
             RegistrationTextField(value = name, onValueChange = { name = it }, label = "Name")
             Spacer(Modifier.height(12.dp))
 
-            RegistrationTextField(value = dob, onValueChange = { dob = it }, label = "Date of Birth (YYYY-MM-DD)")
+            val calendar = java.util.Calendar.getInstance()
+            val year = calendar.get(java.util.Calendar.YEAR)
+            val month = calendar.get(java.util.Calendar.MONTH)
+            val day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = android.app.DatePickerDialog(
+                context,
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    dob = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                }, year, month, day
+            )
+
+            OutlinedTextField(
+                value = dob,
+                onValueChange = { },
+                label = { Text("Date of Birth (YYYY-MM-DD)", color = Color.Gray) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { datePickerDialog.show() }, // Make the whole field clickable
+                enabled = false, // Disable manual typing
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = Color.Black,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                shape = RoundedCornerShape(8.dp),
+                trailingIcon = {
+                    IconButton(onClick = { datePickerDialog.show() }) {
+                        Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date")
+                    }
+                }
+            )
             Spacer(Modifier.height(12.dp))
 
             RegistrationTextField(value = idNumber, onValueChange = { idNumber = it }, label = "ID Number")

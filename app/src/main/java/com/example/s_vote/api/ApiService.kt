@@ -37,6 +37,11 @@ interface ApiService {
         @Body request: CandidateApplicationRequest
     ): Response<CandidateApplicationResponse>
 
+    @POST("update_profile.php")
+    suspend fun updateUserProfile(
+        @Body request: UpdateUserProfileRequest
+    ): Response<GenericResponse>
+
     @POST("update_candidate_profile.php")
     suspend fun updateProfile(
         @Body request: UpdateProfileRequest
@@ -47,6 +52,11 @@ interface ApiService {
     suspend fun uploadImage(
         @Part image: MultipartBody.Part
     ): Response<UploadResponse>
+
+    @POST("submit_feedback.php")
+    suspend fun submitFeedback(
+        @Body request: FeedbackRequest
+    ): Response<GenericResponse>
 
 
     /* =======================

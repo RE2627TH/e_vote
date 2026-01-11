@@ -1,6 +1,7 @@
 package com.example.s_vote
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -102,7 +103,41 @@ fun CandidateApplicationScreen(
         }
 
         field(name, { name = it }, "Full Name")
-        field(dob, { dob = it }, "Date of Birth")
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val calendar = java.util.Calendar.getInstance()
+        val year = calendar.get(java.util.Calendar.YEAR)
+        val month = calendar.get(java.util.Calendar.MONTH)
+        val day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = android.app.DatePickerDialog(
+            context,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                dob = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+            }, year, month, day
+        )
+
+        OutlinedTextField(
+            value = dob,
+            onValueChange = { },
+            label = { Text("Date of Birth") },
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .clickable { datePickerDialog.show() },
+            enabled = false,
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = Color.Black,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            shape = RoundedCornerShape(8.dp),
+            trailingIcon = {
+                IconButton(onClick = { datePickerDialog.show() }) {
+                    Icon(painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date")
+                }
+            }
+        )
+        Spacer(Modifier.height(12.dp))
         field(studentId, { studentId = it }, "Student ID")
         field(email, { email = it }, "Email")
         field(phone, { phone = it }, "Phone")

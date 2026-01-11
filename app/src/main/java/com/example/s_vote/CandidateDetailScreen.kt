@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +24,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.CandidateViewModel
+
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +71,7 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .background(Color.White)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -84,12 +90,25 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                         .padding(4.dp)
                         .clip(CircleShape)
                 ) {
-                    Image(
-                        painter = painterResource(id = candidate.imageResId ?: R.drawable.candidates),
-                        contentDescription = candidate.name ?: "Candidate Photo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
+                    val photoUrl = candidate.photo?.let { 
+                        if (it.startsWith("http")) it else "${com.example.s_vote.api.ApiClient.BASE_URL}$it" 
+                    }
+                    
+                    if (photoUrl != null) {
+                         coil.compose.AsyncImage(
+                            model = photoUrl,
+                            contentDescription = candidate.name ?: "Candidate Photo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = candidate.imageResId ?: R.drawable.candidates),
+                            contentDescription = candidate.name ?: "Candidate Photo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -131,12 +150,24 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Feedback Section
+                var showFeedbackDialog by remember { mutableStateOf(false) }
+
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Student Feedback", fontWeight = FontWeight.Bold, color = Color(0xFFFF8F00))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Student Feedback", fontWeight = FontWeight.Bold, color = Color(0xFFFF8F00))
+                            TextButton(onClick = { showFeedbackDialog = true }) {
+                                Text("Write a Review", color = Color(0xFFE65100), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         if (candidate.feedback.isNullOrEmpty()) {
@@ -151,12 +182,75 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                                     }
                                     Text(feedback.comment, fontSize = 13.sp, color = Color.DarkGray)
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                                    HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                         }
                     }
+                }
+
+                if (showFeedbackDialog) {
+                    var rating by remember { mutableStateOf(0) }
+                    var comment by remember { mutableStateOf("") }
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    
+                    // Fetch current user name (Simplified for now, can be improved to fetch from Profile API)
+                    val sharedPref = context.getSharedPreferences("s_vote_prefs", android.content.Context.MODE_PRIVATE)
+                    val currentUserName = "Student" // Placeholder, ideally fetch from profile
+
+                    AlertDialog(
+                        onDismissRequest = { showFeedbackDialog = false },
+                        title = { Text("Rate Candidate") },
+                        text = {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    for (i in 1..5) {
+                                        IconButton(onClick = { rating = i }) {
+                                            Icon(
+                                                imageVector = if (i <= rating) androidx.compose.material.icons.Icons.Default.Star else androidx.compose.material.icons.Icons.Default.StarBorder,
+                                                contentDescription = "Star $i",
+                                                tint = Color(0xFFFFB300)
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                OutlinedTextField(
+                                    value = comment,
+                                    onValueChange = { comment = it },
+                                    label = { Text("Leave a comment") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    maxLines = 3
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    if (rating == 0) {
+                                        android.widget.Toast.makeText(context, "Please select a rating", android.widget.Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        viewModel.submitFeedback(candidate.id ?: "", currentUserName, rating, comment) { success, msg ->
+                                             android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+                                             if (success) showFeedbackDialog = false
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2104A1))
+                            ) {
+                                Text("Submit")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showFeedbackDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))

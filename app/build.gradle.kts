@@ -74,9 +74,7 @@ dependencies {
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    // Lifecycletu fecycle-runtime-compose:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     
     // Splash Screen
@@ -89,6 +87,5 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
 
-    // ML Kit Text Recognition
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.0")
+
 }

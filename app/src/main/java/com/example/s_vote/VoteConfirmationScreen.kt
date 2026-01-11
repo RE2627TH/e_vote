@@ -33,8 +33,18 @@ fun VoteConfirmationScreen(
     val userId = sharedPref.getString("USER_ID", "") ?: ""
 
     // Candidate Lookup
-    val candidate = candidateData.find { it.id == candidateId }
-    val candidateName = candidate?.name ?: "Unknown Candidate"
+    // Candidate Lookup using ViewModel
+    val candidateViewModel: com.example.s_vote.viewmodel.CandidateViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val candidates by candidateViewModel.candidates.collectAsState()
+    
+    LaunchedEffect(Unit) {
+        if (candidates.isEmpty()) {
+            candidateViewModel.fetchCandidates()
+        }
+    }
+    
+    val candidate = candidates.find { it.id == candidateId }
+    val candidateName = candidate?.name ?: "Loading..."
 
     // Verification Logic Steps
     var currentUserStudentId by remember { mutableStateOf<String?>(null) }

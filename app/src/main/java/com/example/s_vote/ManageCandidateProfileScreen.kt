@@ -3,11 +3,13 @@ package com.example.s_vote
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -131,15 +133,36 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
                     Text("Upload Photo")
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                if (photoPath != null) Text("Photo Uploaded", color = Color.Green)
+                if (photoPath != null) {
+                    val url = if (photoPath!!.startsWith("http")) photoPath else "${com.example.s_vote.api.ApiClient.BASE_URL}$photoPath"
+                    coil.compose.AsyncImage(
+                        model = url,
+                        contentDescription = "Photo Preview",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .border(1.dp, Color.Gray, androidx.compose.foundation.shape.CircleShape),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Symbol Upload Section
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Button(onClick = { symbolLauncher.launch("image/*") }) {
                     Text("Upload Symbol")
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                if (symbolPath != null) Text("Symbol Uploaded", color = Color.Green)
+                if (symbolPath != null) {
+                     val url = if (symbolPath!!.startsWith("http")) symbolPath else "${com.example.s_vote.api.ApiClient.BASE_URL}$symbolPath"
+                     coil.compose.AsyncImage(
+                        model = url,
+                        contentDescription = "Symbol Preview",
+                        modifier = Modifier.size(60.dp),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

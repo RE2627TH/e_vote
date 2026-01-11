@@ -10,7 +10,7 @@ object ApiClient {
     // THIS IS NOW PUBLIC
     // THIS IS NOW PUBLIC
     // UPDATE: Apache is running on port 8080 (from XAMPP screenshot)
-    const val BASE_URL = "http://10.206.125.24:8080/E_vote_api/"
+    const val BASE_URL = "http://10.210.112.24:8080/E_vote_api/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
