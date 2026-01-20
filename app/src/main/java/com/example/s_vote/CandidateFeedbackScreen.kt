@@ -23,41 +23,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.s_vote.viewmodel.CandidateViewModel
+import com.example.s_vote.model.Candidate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
-    val feedbackList = remember {
-        listOf(
+    val viewModel: CandidateViewModel = viewModel()
+    val profile by viewModel.profile.collectAsState()
+    
+    LaunchedEffect(candidateId) {
+        viewModel.fetchProfile(candidateId)
+    }
+
+    val feedbackList = remember(profile) {
+        profile?.candidateDetails?.feedback?.map { 
             FeedbackItem(
-                id = "1",
-                isAnonymous = true,
-                name = "Anonymous Student",
-                initials = "",
-                profileImage = null,
-                rating = 4,
-                major = "Unknown Major",
-                timeAgo = "10m ago",
-                isNew = true,
-                comment = "I really liked your proposal about the cafeteria hours. Have you considered extending the breakfast times to 11 AM for students with late classes?",
-                year = "",
-                showReply = true
-            ),
-            FeedbackItem(
-                id = "2",
+                id = it.userName + it.comment.hashCode(), // Generate pseudo-unique ID
                 isAnonymous = false,
-                name = "Sarah J.",
-                initials = "SJ",
+                name = it.userName,
+                initials = it.userName.take(1).uppercase(),
                 profileImage = null,
-                rating = 2,
-                major = "Computer Science",
-                timeAgo = "2h ago",
+                rating = it.rating.toInt(),
+                major = "Student", // Default
+                timeAgo = "Recently", // Default
                 isNew = false,
-                comment = "Are you planning to address the parking situation? It's a major issue for commuters who arrive after 9 AM. We often circle for 20 minutes.",
-                year = "Junior",
-                showReply = true
+                comment = it.comment,
+                year = "",
+                showReply = false
             )
-        )
+        } ?: emptyList()
     }
 
     Scaffold(
@@ -117,7 +113,7 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "45",
+                            text = "${feedbackList.size}",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
@@ -143,14 +139,14 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Default.MarkEmailUnread,
-                                contentDescription = "New",
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Rating",
                                 tint = Color(0xFFD8B4FE),
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "NEW",
+                                text = "AVG RATING",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFFD8B4FE)
@@ -158,13 +154,13 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "3",
+                            text = String.format("%.1f", if (feedbackList.isNotEmpty()) feedbackList.map { it.rating }.average() else 0.0),
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "Since yesterday",
+                            text = "Based on ${feedbackList.size} reviews",
                             fontSize = 10.sp,
                             color = Color(0xFFD8B4FE)
                         )

@@ -17,9 +17,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.s_vote.viewmodel.AdminViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+
+import androidx.compose.runtime.DisposableEffect
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(navController: NavController) {
+    val viewModel: AdminViewModel = viewModel()
+    val stats by viewModel.dashboardStats.collectAsState()
+    
+    DisposableEffect(Unit) {
+        viewModel.startPolling()
+        onDispose { viewModel.stopPolling() }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,12 +92,10 @@ fun AdminDashboardScreen(navController: NavController) {
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val totalCandidates = candidateData.size
-
-                DashboardCard(icon = Icons.Default.Groups, value = "1,250", label = "Total Students")
-                DashboardCard(icon = Icons.Default.People, value = totalCandidates.toString(), label = "Total Candidates")
-                DashboardCard(icon = Icons.Default.HowToVote, value = "45", label = "Active Elections")
-                DashboardCard(icon = Icons.Default.Poll, value = "890", label = "Votes Cast")
+                DashboardCard(icon = Icons.Default.Groups, value = stats?.studentsCount ?: "0", label = "Total Students")
+                DashboardCard(icon = Icons.Default.People, value = stats?.candidatesCount ?: "0", label = "Total Candidates")
+                DashboardCard(icon = Icons.Default.HowToVote, value = stats?.activeElections ?: "0", label = "Active Elections")
+                DashboardCard(icon = Icons.Default.Poll, value = stats?.votesCast ?: "0", label = "Votes Cast")
             }
         }
     }

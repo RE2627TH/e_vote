@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
@@ -28,11 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.api.ApiClient
@@ -41,7 +44,7 @@ import com.example.s_vote.api.ApiClient
 @Composable
 fun CandidateDashboardScreen(navController: NavController, candidateId: String) {
 
-    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val profile by viewModel.profile.collectAsState()
 
     val isLoading by viewModel.isLoading.collectAsState()
@@ -241,7 +244,7 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                Brush.horizontalGradient(
                                     colors = listOf(
                                         Color(0xFF2C097F).copy(alpha = 0.1f),
                                         Color(0xFF2C097F).copy(alpha = 0.05f)
@@ -340,7 +343,7 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(verticalAlignment = Alignment.Bottom) {
                                         Text(
-                                            "120", // Mock Data
+                                            "${candidateDesc?.voteCount ?: 0}", 
                                             fontSize = 32.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFF111318)
@@ -364,11 +367,15 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                         .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(12.dp))
                                         .padding(12.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MenuBook, // Symbol Icon
+                                    val symbolUrl = candidateDesc?.symbolUrl?.let {
+                                        if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
+                                    }
+                                    coil.compose.AsyncImage(
+                                        model = symbolUrl ?: Icons.Default.CheckCircle, 
                                         contentDescription = "Symbol",
-                                        tint = Color(0xFF2C097F),
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(32.dp),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                                        colorFilter = if (candidateDesc?.symbolUrl == null) androidx.compose.ui.graphics.ColorFilter.tint(Color(0xFF2C097F)) else null
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
@@ -384,16 +391,20 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             Spacer(modifier = Modifier.height(20.dp))
 
                             // Progress Bar Section
+                            val voteGoal = 500
+                            val currentVotes = candidateDesc?.voteCount ?: 0
+                            val progress = (currentVotes.toFloat() / voteGoal.toFloat()).coerceIn(0f, 1f)
+                            
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("Vote Share Goal", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF616F89))
-                                Text("45%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2C097F))
+                                Text("${(progress * 100).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2C097F))
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             LinearProgressIndicator(
-                                progress = { 0.45f },
+                                progress = { progress },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(10.dp)

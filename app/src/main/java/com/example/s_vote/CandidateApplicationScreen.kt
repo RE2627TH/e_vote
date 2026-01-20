@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
@@ -103,7 +105,7 @@ fun CandidateApplicationScreen(
         }
 
         field(name, { name = it }, "Full Name")
-        val context = androidx.compose.ui.platform.LocalContext.current
+        val context = LocalContext.current
         val calendar = java.util.Calendar.getInstance()
         val year = calendar.get(java.util.Calendar.YEAR)
         val month = calendar.get(java.util.Calendar.MONTH)
@@ -133,7 +135,7 @@ fun CandidateApplicationScreen(
             shape = RoundedCornerShape(8.dp),
             trailingIcon = {
                 IconButton(onClick = { datePickerDialog.show() }) {
-                    Icon(painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date")
+                    Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date")
                 }
             }
         )

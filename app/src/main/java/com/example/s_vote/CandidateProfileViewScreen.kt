@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.s_vote.navigation.Routes
@@ -29,7 +30,7 @@ import com.example.s_vote.viewmodel.CandidateViewModel
 @Composable
 fun CandidateProfileViewScreen(navController: NavController, candidateId: String) {
 
-    val viewModel: CandidateViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: CandidateViewModel = viewModel()
     val profile by viewModel.profile.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()

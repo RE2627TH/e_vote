@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,7 +75,7 @@ fun CampaignPreviewScreen(navController: NavController, candidateId: String) {
                             .fillMaxWidth()
                             .height(200.dp)
                             .background(
-                                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                brush = Brush.verticalGradient(
                                     colors = listOf(Color(0xFF009688), Color(0xFF00796B))
                                 )
                             )

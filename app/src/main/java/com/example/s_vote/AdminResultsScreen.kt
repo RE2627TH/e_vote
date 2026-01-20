@@ -22,8 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +35,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-data class ElectionResult(
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.s_vote.viewmodel.AdminViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.filled.Publish
+import androidx.compose.runtime.DisposableEffect
+
+// Locally used UI model to hold calculated percentage
+data class UiElectionResult(
     val position: String,
     val candidate: String,
     val candidateImage: Int,
@@ -39,16 +51,36 @@ data class ElectionResult(
     val percentage: Float
 )
 
-val electionResults = listOf(
-    ElectionResult("President", "Kaviya P", R.drawable.ig_kaviya, 540, 61.4f),
-    ElectionResult("Vice President", "Nivetha", R.drawable.nivetha, 480, 54.5f),
-    ElectionResult("Cultural Secretary", "Gowtham", R.drawable.gowtham, 320, 36.4f),
-    ElectionResult("Sports Secretary", "Muthusamy", R.drawable.muthuswamy, 610, 69.3f)
-)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminResultsScreen(navController: NavController) {
+    val viewModel: AdminViewModel = viewModel()
+    val rawResults by viewModel.results.collectAsState()
+    
+    DisposableEffect(Unit) {
+        viewModel.startPolling()
+        onDispose { viewModel.stopPolling() }
+    }
+
+    // Process raw results into UI model with percentages
+    val groupedResults = rawResults.groupBy { it.position }
+    val uiResults = remember(rawResults) {
+        rawResults.map { result ->
+            val totalVotesForPos = groupedResults[result.position]?.sumOf { it.voteCount.toIntOrNull() ?: 0 } ?: 0
+            val votes = result.voteCount.toIntOrNull() ?: 0
+            val percentage = if (totalVotesForPos > 0) (votes.toFloat() / totalVotesForPos) * 100 else 0f
+            
+            UiElectionResult(
+                position = result.position,
+                candidate = result.name,
+                candidateImage = R.drawable.ic_launcher_foreground, // Placeholder
+                votes = votes,
+                percentage = percentage
+            )
+        }.sortedByDescending { it.percentage }
+    }
 
     Scaffold(
         topBar = {
@@ -59,11 +91,34 @@ fun AdminResultsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                actions = {
+                    // Removed top bar publish button
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF2104A1),
                     titleContentColor = Color.White
                 )
             )
+            
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color.White,
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                Button(
+                    onClick = { viewModel.publishResults() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6743FF)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.Publish, contentDescription = null, tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Approve & Publish Results", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     ) { padding ->
 
@@ -91,7 +146,7 @@ fun AdminResultsScreen(navController: NavController) {
             Spacer(Modifier.height(8.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(electionResults) { result ->
+                items(uiResults) { result ->
                     AnimatedResultRow(result)
                 }
             }
@@ -100,7 +155,7 @@ fun AdminResultsScreen(navController: NavController) {
 }
 
 @Composable
-fun AnimatedResultRow(result: ElectionResult) {
+fun AnimatedResultRow(result: UiElectionResult) {
 
     // WINNER highlight
     val isWinner = result.percentage > 50

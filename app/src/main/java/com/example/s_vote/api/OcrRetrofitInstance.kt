@@ -4,13 +4,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
-object ApiClient {
-
-    // THIS IS NOW PUBLIC
-    // THIS IS NOW PUBLIC
-    // UPDATE: Apache is running on port 8080 (from XAMPP screenshot)
-    const val BASE_URL = "http://10.57.135.24:8080/E_vote_api/"
+object OcrRetrofitInstance {
+    // Replace with your Python server IP (must be same network as Android)
+    private const val OCR_BASE_URL = "http://10.57.135.24:5000/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -18,11 +16,14 @@ object ApiClient {
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     val api: ApiService by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(OCR_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

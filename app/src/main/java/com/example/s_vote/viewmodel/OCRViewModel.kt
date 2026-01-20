@@ -5,12 +5,16 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.s_vote.api.OcrRetrofitInstance
 import com.example.s_vote.api.RetrofitInstance
 import com.example.s_vote.model.VerifyStudentRequest
-import com.example.s_vote.ocr.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 
 class OcrViewModel : ViewModel() {
 
@@ -27,71 +31,54 @@ class OcrViewModel : ViewModel() {
         }
     }
 
-    /**
-     * MAIN ENTRY POINT
-     * Call this after camera / gallery gives bitmap
-     */
     fun processIdCard(bitmap: Bitmap, context: Context) {
         _uiState.value = OcrState.Scanning
 
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+        viewModelScope.launch {
             try {
-                // 0️⃣ Downscale image ONCE
-                val resizedBitmap = ImagePreprocessor.resize(bitmap, 1024)
+                // 1. Get Registered ID from session
+                val sharedPref = context.getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
+                val registeredId = sharedPref.getString("STUDENT_ID", "") ?: ""
 
-                var finalRegNo: String? = null
-                var lastRawOCR = ""
-                val rotations = listOf(0f, 90f, 270f, 180f)
+                // 2. Convert Bitmap to MultipartBody.Part
+                val stream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                val byteArray = stream.toByteArray()
+                val requestFile = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val body = MultipartBody.Part.createFormData("image", "id_card.jpg", requestFile)
 
-                for (rotation in rotations) {
-                    val workingBitmap = if (rotation == 0f) resizedBitmap else ImagePreprocessor.rotate(resizedBitmap, rotation)
+                // 3. Upload to Python OCR Server
+                val ocrResponse = OcrRetrofitInstance.api.uploadOcrImage(body)
 
-                    // 1️⃣ Preprocess
-                    val gray = ImagePreprocessor.toGrayscale(workingBitmap)
-                    val cleanBitmap = ImagePreprocessor.applyThreshold(gray)
-
-                    // 2️⃣ Crop & OCR College
-                    val collegeBitmap = CropUtils.cropCollege(cleanBitmap)
-                    val rawCollege = CollegeOcrEngine.readCollegeName(context, collegeBitmap)
-                    lastRawOCR = rawCollege // Capture for error reporting
-
-                    val validCollege = CollegeValidator.validate(rawCollege)
-
-                    // 3️⃣ OCR Register Number (Scan FULL Image because ID might be anywhere)
-                    // We don't cropRegNo anymore because the box is full screen.
-                    val regNo = RegisterOcrEngine.readRegisterNumber(context, cleanBitmap)
-                    Log.d("OCR", "Rotation $rotation - College: $validCollege - Reg: $regNo")
-
-                    // Success Condition 1: Valid Register Number found (Strongest signal)
-                    if (regNo.length >= 7 && regNo.count { it.isDigit() } >= 6) { 
-                         // Check for at least 6-7 digits to be sure it's not noise
-                         finalRegNo = regNo.filter { it.isDigit() }
-                         break 
+                if (ocrResponse.isSuccessful && ocrResponse.body() != null) {
+                    val result = ocrResponse.body()!!
+                    
+                    if (result.version != "2.4") {
+                        setError("Update Required: Please restart ocr_server.py (V2.4).")
+                        return@launch
                     }
 
-                    // Success Condition 2: Valid College Found + Some digits
-                    if (validCollege != null) {
-                         // If regNo failed strict check but we have college, try lenient reg extraction
-                         val digits = regNo.filter { it.isDigit() }
-                         if (digits.length >= 5) {
-                             finalRegNo = digits
-                             break
-                         }
-                    }
-                }
+                    val ocrId = result.studentId.trim().uppercase()
+                    val ocrName = result.studentName.trim()
+                    val ocrDept = result.collegeName.trim()
+                    
+                    Log.d("OCR_ONLINE", "Scanned: [$ocrId], Quality: ${result.isQualityScan}")
 
-                if (finalRegNo != null) {
-                    verifyStudentWithBackend(finalRegNo)
+                    // "No-Fail" Strategy: Always return to detail screen with what we found
+                    _uiState.value = OcrState.Detected(ocrId, ocrName, ocrDept)
                 } else {
-                    val msg = if (lastRawOCR.length > 20) lastRawOCR.substring(0, 20) + "..." else lastRawOCR
-                    setError("ID Failed. Saw: '$msg'. Card must be in purple box.")
+                    setError("OCR Server Error: ${ocrResponse.code()}")
                 }
 
             } catch (e: Exception) {
-                setError("OCR Failed: ${e.message}")
+                Log.e("OCR_ERROR", "Scanner Exception", e)
+                setError("Network/Scan Error: ${e.message}")
             }
         }
     }
+
+    private fun isOcrNumeric(text: String): Boolean = text.all { it.isDigit() }
+
 
     fun verifyStudentId(regNo: String) {
         verifyStudentWithBackend(regNo)
@@ -102,21 +89,16 @@ class OcrViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response =
-                    RetrofitInstance.api.verifyStudent(
-                        VerifyStudentRequest(regNo)
-                    )
-
+                val response = RetrofitInstance.api.verifyStudent(VerifyStudentRequest(regNo))
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!
                     if (result.success && result.studentData != null) {
-                        _uiState.value =
-                            OcrState.Verified(result.studentData)
+                        _uiState.value = OcrState.Verified(result.studentData)
                     } else {
                         setError("${result.message}\n(Scanned ID: $regNo)")
                     }
                 } else {
-                    setError("Verification failed: Server error")
+                    setError("Verification failed: Server error or invalid ID")
                 }
             } catch (e: Exception) {
                 setError("Network error: ${e.message}")
@@ -133,6 +115,7 @@ sealed class OcrState {
     object Idle : OcrState()
     object Scanning : OcrState()
     object Verifying : OcrState()
+    data class Detected(val id: String, val name: String, val dept: String) : OcrState()
     data class Verified(val studentData: com.example.s_vote.model.StudentData) : OcrState()
     data class Error(val message: String) : OcrState()
 }

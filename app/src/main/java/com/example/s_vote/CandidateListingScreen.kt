@@ -2,6 +2,7 @@ package com.example.s_vote
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,19 +22,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import coil.compose.AsyncImage
+import com.example.s_vote.api.ApiClient
+import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CandidateListingScreen(navController: NavController, roleName: String) {
 
-    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val candidates by viewModel.candidates.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -38,112 +47,161 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
         viewModel.fetchCandidates()
     }
 
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF0F0533),
+            Color(0xFF2104A1),
+            Color(0xFF6743FF)
+        )
+    )
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Candidates for $roleName") },
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        roleName.replace("_", " ").uppercase(),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = 2.sp
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White
                 )
             )
         },
         bottomBar = {
             BottomNavBar(navController = navController, selectedRoute = Routes.POLL_HISTORY)
-        }
+        },
+        containerColor = Color.Transparent
     ) { padding ->
 
-        Column(
+        Box(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
-                .background(Color.White)
+                .background(backgroundGradient)
         ) {
+            // Background Glow
+            Box(
+                modifier = Modifier
+                    .size(250.dp)
+                    .offset(y = 100.dp, x = 200.dp)
+                    .background(Color(0xFF2E7D32).copy(alpha = 0.05f), CircleShape)
+                    .align(Alignment.BottomEnd)
+            )
 
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                // Filter candidates by role
-                val filteredCandidates = candidates.filter {
-                    val isApproved = it.status.equals("approved", ignoreCase = true)
-                    val matchesRole = (it.position ?: "").lowercase().replace(" ", "_") == roleName.lowercase() ||
-                            (it.role ?: "").lowercase() == roleName.lowercase()
-                    isApproved && matchesRole
-                }
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+            ) {
+                if (isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                } else {
+                    val filteredCandidates = candidates.filter {
+                        val isApproved = it.status.equals("approved", ignoreCase = true)
+                        val matchesRole = (it.position ?: "").lowercase().replace(" ", "_") == roleName.lowercase() ||
+                                (it.role ?: "").lowercase() == roleName.lowercase()
+                        isApproved && matchesRole
+                    }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp)
-                ) {
-
-                    item {
-                        // Info Card
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(Color(0xFF6A4CFF).copy(alpha = 0.1f), Color(0xFF9370DB).copy(alpha = 0.1f))
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
+                    ) {
+                        item {
+                            // Glass Info Banner
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .border(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.1f),
+                                        RoundedCornerShape(24.dp)
                                     )
-                                )
-                                .padding(16.dp)
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    "Select the candidate you want to vote for",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                                    .padding(20.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_thumb_up),
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Column {
+                                        Text(
+                                            "MEET YOUR CANDIDATES",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color.White,
+                                            letterSpacing = 1.sp
+                                        )
+                                        Text(
+                                            "Review profiles and manifestos carefully",
+                                            fontSize = 10.sp,
+                                            color = Color.White.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                }
+                            }
 
-                                Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(32.dp))
 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    "Click on a candidate to view their manifesto and campaign details",
+                                    "AVAILABLE PROFILES",
                                     fontSize = 12.sp,
-                                    color = Color.Black.copy(alpha = 0.7f),
-                                    lineHeight = 16.sp
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White,
+                                    letterSpacing = 2.sp
                                 )
+                                Spacer(Modifier.width(12.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF6743FF))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        "${filteredCandidates.size}",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.White
+                                    )
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text(
-                            "${filteredCandidates.size} Candidates Available",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = Color.Black
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    items(filteredCandidates) { candidate ->
-                        CandidateCardEnhanced(
-                            candidate = candidate,
-                            onClick = {
-                                val safeId = candidate.id ?: ""
-                                if (safeId.isNotEmpty()) {
-                                    navController.navigate(Routes.CANDIDATE_DETAIL.replace("{id}", safeId))
+                        items(filteredCandidates) { candidate ->
+                            CandidateCardPremium(
+                                candidate = candidate,
+                                onClick = {
+                                    val safeId = candidate.id ?: ""
+                                    if (safeId.isNotEmpty()) {
+                                        navController.navigate(Routes.CANDIDATE_DETAIL.replace("{id}", safeId))
+                                    }
                                 }
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
+                            )
+                        }
                     }
                 }
             }
@@ -152,98 +210,117 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
 }
 
 @Composable
-fun CandidateCardEnhanced(candidate: com.example.s_vote.model.Candidate, onClick: () -> Unit) {
-
+fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color.White)
-            .shadow(elevation = 5.dp, shape = RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(
+                1.dp,
+                Color.White.copy(alpha = 0.1f),
+                RoundedCornerShape(28.dp)
+            )
             .clickable(onClick = onClick)
-            .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            // LEFT: Role Icon in a Box
+            // Profile Image with ring and Symbol Overlay
             Box(
                 modifier = Modifier
-                    .size(70.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(Color(0xFF6A4CFF).copy(alpha = 0.15f), Color(0xFF9370DB).copy(alpha = 0.15f))
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+                    .size(72.dp)
             ) {
-                Image(
-                    painter = painterResource(candidate.symbolResId ?: R.drawable.election_day),
-                    contentDescription = candidate.position ?: "Position",
-                    modifier = Modifier.size(40.dp)
-                )
+                // Main Profile Image
+                Box(
+                    modifier = Modifier
+                        .size(68.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.1f))
+                        .border(2.dp, Color(0xFF6743FF), CircleShape)
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                ) {
+                    val photoUrl = candidate.photo?.let {
+                        if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
+                    }
+                    AsyncImage(
+                        model = photoUrl ?: candidate.imageResId ?: R.drawable.candidates,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                // Symbol Overlay "Ring"
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .align(Alignment.BottomEnd)
+                        .clip(CircleShape)
+                        .background(Color(0xFF6743FF))
+                        .border(2.dp, Color(0xFF0F0533), CircleShape)
+                        .padding(4.dp)
+                ) {
+                    val symbolUrl = candidate.symbolUrl?.let {
+                        if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
+                    }
+                    AsyncImage(
+                        model = symbolUrl ?: candidate.symbolResId ?: Icons.Default.CheckCircle, // Fallback to a check icon
+                        contentDescription = "Symbol",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
+                        colorFilter = if (candidate.symbolUrl == null && candidate.symbolResId == null) 
+                            ColorFilter.tint(Color.White) else null
+                    )
+                }
             }
 
-            // CENTER: Candidate Details
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    candidate.name ?: "Unknown",
-                    fontSize = 16.sp,
+                    (candidate.name ?: "UNKNOWN").uppercase(),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    (candidate.position ?: "CANDIDATE").uppercase(),
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A0033)
+                    color = Color.White.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    candidate.position ?: "No Position",
-                    fontSize = 13.sp,
-                    color = Color(0xFF7A7A7A),
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Badges
                 if (!candidate.badges.isNullOrEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         candidate.badges?.take(2)?.forEach { badge ->
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFFEDE7FF))
-                                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.White.copy(alpha = 0.1f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    "✓ $badge",
-                                    fontSize = 9.sp,
-                                    color = Color(0xFF6A4CFF),
-                                    fontWeight = FontWeight.SemiBold
+                                    badge.uppercase(),
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White.copy(alpha = 0.7f)
                                 )
                             }
                         }
                     }
                 }
             }
-
-            // RIGHT: Profile Photo
-            Image(
-                painter = painterResource(id = candidate.imageResId ?: R.drawable.candidates),
-                contentDescription = candidate.name ?: "Candidate Photo",
-                modifier = Modifier
-                    .size(70.dp)
-                    .clip(CircleShape)
+            
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.size(24.dp)
             )
         }
     }
