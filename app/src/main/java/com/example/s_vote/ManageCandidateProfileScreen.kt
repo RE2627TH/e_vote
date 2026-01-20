@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape // Added import for CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -13,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -23,8 +26,8 @@ import com.example.s_vote.model.AppUser
 @Composable
 fun ManageCandidateProfileScreen(navController: NavController, candidateId: String) {
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val context = LocalContext.current
+    val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val profile by viewModel.profile.collectAsState()
 
     // Fetch profile on load

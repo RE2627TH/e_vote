@@ -25,5 +25,6 @@ data class Candidate(
     val imageResId: Int? = null,
     val symbolResId: Int? = null,
     val badges: List<String>? = null,
-    val feedback: List<com.example.s_vote.model.Feedback>? = null
+    val feedback: List<com.example.s_vote.model.Feedback>? = null,
+    @SerializedName("vote_count") val voteCount: Int = 0
 )

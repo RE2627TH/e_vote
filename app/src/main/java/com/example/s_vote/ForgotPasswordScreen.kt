@@ -8,18 +8,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(navController: NavController) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val viewModel: com.example.s_vote.viewmodel.ForgotPasswordViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val context = LocalContext.current
+    val viewModel: com.example.s_vote.viewmodel.ForgotPasswordViewModel = viewModel()
     val resetState by viewModel.resetState.collectAsState()
 
     var id by remember { mutableStateOf("") }
@@ -27,12 +31,11 @@ fun ForgotPasswordScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Handle State
     LaunchedEffect(resetState) {
         when(resetState) {
             is com.example.s_vote.viewmodel.ResetState.Success -> {
                 android.widget.Toast.makeText(context, (resetState as com.example.s_vote.viewmodel.ResetState.Success).message, android.widget.Toast.LENGTH_LONG).show()
-                navController.popBackStack() // Go back to login
+                navController.popBackStack() 
                 viewModel.resetState()
             }
             is com.example.s_vote.viewmodel.ResetState.Error -> {
@@ -43,106 +46,143 @@ fun ForgotPasswordScreen(navController: NavController) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)   // ⭐ WHITE BACKGROUND ADDED
-            .padding(20.dp)
-    ) {
-
-        // Top bar with back arrow
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Welcome Back!", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Reset your password", fontSize = 16.sp, color = Color.Gray)
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        OutlinedTextField(
-            value = id,
-            onValueChange = { id = it },
-            label = { Text("ID No") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color.White
-            )
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF0F0533),
+            Color(0xFF2104A1),
+            Color(0xFF6743FF)
         )
+    )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email ID") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Create Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Button(
-            onClick = {
-                if (id.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
-                    if (password == confirmPassword) {
-                        viewModel.resetPassword(id, email, password)
-                    } else {
-                        android.widget.Toast.makeText(context, "Passwords do not match", android.widget.Toast.LENGTH_SHORT).show()
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        "RESET ACCESS",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = 2.sp
+                    ) 
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
-                } else {
-                    android.widget.Toast.makeText(context, "Please fill all fields", android.widget.Toast.LENGTH_SHORT).show()
-                }
-            },
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
+                )
+            )
+        },
+        containerColor = Color.Transparent
+    ) { padding ->
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFF28038F)),
-            enabled = resetState !is com.example.s_vote.viewmodel.ResetState.Loading
+                .fillMaxSize()
+                .background(backgroundGradient)
         ) {
-            if (resetState is com.example.s_vote.viewmodel.ResetState.Loading) {
-                CircularProgressIndicator(color = Color.White)
-            } else {
-                Text("Submit", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            // Background Glows
+            Box(
+                modifier = Modifier
+                    .size(300.dp)
+                    .offset(y = (-100).dp, x = 200.dp)
+                    .background(Color(0xFFFF3DA6).copy(alpha = 0.08f), androidx.compose.foundation.shape.CircleShape)
+                    .align(Alignment.TopEnd)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    "Welcome back!".uppercase(),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = 2.sp
+                )
+                Text(
+                    "Authorize Identity to Reset Password",
+                    fontSize = 12.sp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Modern Input Fields
+                ModernForgotField(label = "STUDENT ID / ROLL NO.", value = id, onValueChange = { id = it })
+                ModernForgotField(label = "REGISTERED EMAIL", value = email, onValueChange = { email = it })
+                ModernForgotField(label = "NEW PASSWORD", value = password, onValueChange = { password = it }, isPassword = true)
+                ModernForgotField(label = "CONFIRM NEW PASSWORD", value = confirmPassword, onValueChange = { confirmPassword = it }, isPassword = true)
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        if (id.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+                            if (password == confirmPassword) {
+                                viewModel.resetPassword(id, email, password)
+                            } else {
+                                android.widget.Toast.makeText(context, "Passwords do not match", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            android.widget.Toast.makeText(context, "Please fill all fields", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(28.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
+                    enabled = resetState !is com.example.s_vote.viewmodel.ResetState.Loading,
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                ) {
+                    if (resetState is com.example.s_vote.viewmodel.ResetState.Loading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("SUBMIT REQUEST", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ModernForgotField(label: String, value: String, onValueChange: (String) -> Unit, isPassword: Boolean = false) {
+    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+        Text(
+            label, 
+            fontSize = 10.sp, 
+            fontWeight = FontWeight.Black, 
+            color = Color.White.copy(alpha = 0.4f),
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+            singleLine = true,
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
+                focusedBorderColor = Color.White.copy(alpha = 0.4f),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+            )
+        )
     }
 }

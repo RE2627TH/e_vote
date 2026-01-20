@@ -17,17 +17,24 @@ class VoteViewModel : ViewModel() {
         _voteState.value = VoteState.Loading
         viewModelScope.launch {
             try {
-                // Assuming electionId is optional or fixed for now (e.g., 1). 
-                // Adjust if backend enforces it.
+                // 1. Fetch Active Election ID
+                val electionResponse = RetrofitInstance.api.getActiveElection()
+                val electionId: String = if (electionResponse.isSuccessful && electionResponse.body() != null) {
+                    electionResponse.body()!!.id
+                } else {
+                    "1" // Default to "1" as a String
+                }
+
+                // 2. Cast Vote
                 val request = VoteRequest(
-                    userId = userId, 
-                    candidateId = candidateId, 
-                    position = position
+                    userId = userId,
+                    candidateId = candidateId,
+                    position = position,
+                    electionId = electionId.toIntOrNull() ?: 1
                 )
-                
+
                 val response = RetrofitInstance.api.castVote(request)
-                
-                // Response handling - Assuming generic response or specific VoteResponse
+
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!
                     if (result.success) {
@@ -44,7 +51,7 @@ class VoteViewModel : ViewModel() {
             }
         }
     }
-    
+
     fun resetState() {
         _voteState.value = VoteState.Idle
     }

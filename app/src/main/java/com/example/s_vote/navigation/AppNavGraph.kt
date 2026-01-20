@@ -151,7 +151,7 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("candidateId") { type = NavType.StringType })
         ) { backStackEntry ->
             val candidateId = backStackEntry.arguments!!.getString("candidateId")!!
-            ViewAllFeedbackScreen(navController = navController, candidateId = candidateId)
+            CandidateFeedbackScreen(navController = navController, candidateId = candidateId)
         }
 
         composable(
@@ -162,10 +162,6 @@ fun AppNavGraph(navController: NavHostController) {
             CampaignPreviewScreen(navController = navController, candidateId = candidateId)
         }
         // In your navigation composable
-        composable("candidate_feedback/{candidateId}") { backStackEntry ->
-            val candidateId = backStackEntry.arguments?.getString("candidateId") ?: ""
-            CandidateFeedbackScreen(navController, candidateId)
-        }
         composable(
             route = Routes.CANDIDATE_APPLICATION,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })

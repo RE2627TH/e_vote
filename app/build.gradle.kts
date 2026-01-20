@@ -87,5 +87,11 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
 
+    // TensorFlow Lite
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation("com.github.yalantis:ucrop:2.2.8")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+
 
 }

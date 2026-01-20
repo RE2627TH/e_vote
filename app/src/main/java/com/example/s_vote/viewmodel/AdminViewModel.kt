@@ -139,8 +139,45 @@ class AdminViewModel : ViewModel() {
             }
         }
     }
+
+    fun publishResults() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.api.publishResults()
+                if (response.isSuccessful && response.body()?.success == true) {
+                    setMessage("Results Published Successfully!")
+                } else {
+                    setMessage("Failed to publish results")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
     
     fun clearMessage() {
         _message.value = null
+    }
+
+    // Polling Logic
+    private var job: kotlinx.coroutines.Job? = null
+
+    fun startPolling() {
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            while (true) {
+                fetchDashboardStats()
+                fetchResults()
+                kotlinx.coroutines.delay(5000) // Poll every 5 seconds
+            }
+        }
+    }
+
+    fun stopPolling() {
+        job?.cancel()
+        job = null
     }
 }

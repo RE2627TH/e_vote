@@ -41,6 +41,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                         sharedPref.edit()
                             .putString("USER_ID", result.user_id.toString())
+                            .putString("STUDENT_ID", result.student_id)
                             .putString("USER_ROLE", result.role)
                             .putBoolean("IS_LOGGED_IN", true)
                             .apply()

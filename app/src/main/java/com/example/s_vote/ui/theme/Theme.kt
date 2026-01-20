@@ -1,52 +1,78 @@
 package com.example.s_vote.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Primary,
-    secondary = PrimaryDark,
-    tertiary = Accent,
-    surface = Surface,
-    onPrimary = OnPrimary
-)
-
+// We prioritize Light Theme as per user request
 private val LightColorScheme = lightColorScheme(
     primary = Primary,
-    secondary = PrimaryDark,
-    tertiary = Accent,
-    surface = Surface,
-    onPrimary = OnPrimary
+    onPrimary = SurfaceLight,
+    primaryContainer = Primary.copy(alpha = 0.1f),
+    onPrimaryContainer = PrimaryDark,
+    
+    secondary = Secondary,
+    onSecondary = SurfaceLight,
+    secondaryContainer = Secondary.copy(alpha = 0.1f),
+    onSecondaryContainer = Color(0xFF0369A1), // Sky 700
+
+    background = BackgroundLight,
+    onBackground = TextPrimary,
+    
+    surface = SurfaceLight,
+    onSurface = TextPrimary,
+    
+    error = TerribleRed,
+    onError = SurfaceLight,
+    
+    outline = OutlineColor,
+    surfaceVariant = BackgroundLight, 
+    onSurfaceVariant = TextSecondary
+)
+
+// Fallback Dark (mapped to look decent if forced, but system prefers light now)
+private val DarkColorScheme = darkColorScheme(
+    primary = Primary,
+    onPrimary = SurfaceLight,
+    background = TextPrimary,
+    onBackground = SurfaceLight,
+    surface = Color(0xFF0F172A), // Slate 900
+    onSurface = SurfaceLight
 )
 
 @Composable
 fun SvoteTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Disable dynamic color to enforce our branding
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    // Force light theme preference if user asked for "light theme la venum" (all screens)
+    // We will still inspect system setting but prioritize our designed Light Scheme.
+    // For now, let's respect system but make Light Scheme default and polished.
+    val colorScheme = LightColorScheme // Always use Light Scheme as requested by User
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb() // Make status bar brand color
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false // White text on dark status bar
+        }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

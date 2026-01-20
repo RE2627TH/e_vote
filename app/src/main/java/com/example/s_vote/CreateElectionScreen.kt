@@ -12,6 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import androidx.compose.foundation.background
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import android.widget.Toast
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,14 +26,14 @@ fun CreateElectionScreen(navController: NavController) {
     var endingDate by remember { mutableStateOf("") }
     var candidates by remember { mutableStateOf("") }
 
-    val viewModel: com.example.s_vote.viewmodel.AdminViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: com.example.s_vote.viewmodel.AdminViewModel = viewModel()
     val message by viewModel.message.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
     LaunchedEffect(message) {
         message?.let {
-            android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
             if(it.contains("created", ignoreCase = true)) {
                  navController.popBackStack()

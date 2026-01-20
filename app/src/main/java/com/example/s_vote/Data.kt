@@ -18,7 +18,8 @@ data class ElectionStatus(
     @SerializedName("title") val title: String = "College Election 2025",
     @SerializedName("start_date") val startDate: String? = null,
     @SerializedName("end_date") val endDate: String? = null,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    @SerializedName("is_published") val isPublished: Boolean = false
 )
 
 var currentElection = ElectionStatus()

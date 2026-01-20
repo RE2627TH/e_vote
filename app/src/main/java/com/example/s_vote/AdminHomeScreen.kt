@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,12 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import com.example.s_vote.ui.theme.*
 
 //--------------------------------------------------------
 // FILTER BUTTON
@@ -40,37 +43,38 @@ import kotlin.random.Random
 @Composable
 fun FilterButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
 
-    val bgColor = if (isSelected) Color(0xFF3E1F7F) else Color(0xFFE8E2FF)
-    val textColor = if (isSelected) Color.White else Color(0xFF3E1F7F)
+    val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface  
 
-    Box(
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = containerColor,
+        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+            .clickable { onClick() }
     ) {
-        Text(label, color = textColor, fontSize = 14.sp)
+        Text(
+            label, 
+            color = contentColor, 
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_API_USAGE")
 @Composable
 fun AdminHomeScreen(navController: NavController) {
 
-    val viewModel: com.example.s_vote.viewmodel.AdminViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: com.example.s_vote.viewmodel.AdminViewModel = viewModel()
     val candidateList by viewModel.pendingCandidates.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val message by viewModel.message.collectAsState()
 
-    var selectedFilter by remember { mutableStateOf("All") } // NOTE: filtering might need adjustment as API fetches only pending or approved by default.
-    // Ideally we fetch ALL for admin or have tabs. For now, let's assume this screen manages ALL (which means we might need a get_all API or similar).
-    // Given the previous setup, let's focus on PENDING for approval workflow.
-
-    // To show all, we might need multiple fetches or a unified API.
-    // Let's stick to showing what the viewModel provides (which currently is pending).
-
+    var selectedFilter by remember { mutableStateOf("All") } 
+    
     LaunchedEffect(Unit) {
         viewModel.fetchPendingCandidates()
     }
@@ -86,10 +90,10 @@ fun AdminHomeScreen(navController: NavController) {
 
     var query by remember { mutableStateOf("") }
     var showDetailFor by remember { mutableStateOf<com.example.s_vote.model.Candidate?>(null) }
-    var showAddDialog by remember { mutableStateOf(false) } // Removed logic for now as adding is done via registration
+    var showAddDialog by remember { mutableStateOf(false) } 
     var refreshing by remember { mutableStateOf(false) }
 
-    // Filter Logic (Client side for now)
+    // Filter Logic
     val filteredList = candidateList.filter { c ->
         (selectedFilter == "All" || c.status.equals(selectedFilter, ignoreCase = true)) &&
                 (query.isBlank() || (c.name ?: "").contains(query, ignoreCase = true) || (c.role ?: "").contains(query, ignoreCase = true))
@@ -101,13 +105,19 @@ fun AdminHomeScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manage Candidates") },
+                title = { 
+                    Text(
+                        "Manage Candidates", 
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -115,96 +125,152 @@ fun AdminHomeScreen(navController: NavController) {
                     IconButton(onClick = {
                         viewModel.fetchPendingCandidates()
                     }) {
-                        Text(if (isLoading) "Loading..." else "Refresh", color = Color.White)
+                        Text(
+                            if (isLoading) "..." else "Sync", 
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         },
-        floatingActionButton = {
-            // Add Candidate manually not supported in this flow, usually done by user registration
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
                 .padding(padding)
-                .padding(10.dp)
+                .padding(horizontal = 16.dp)
         ) {
 
             // Header
             Text(
-                "Pending Requests", // Updated title to reflect context
+                "Pending Approvals", 
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                color = Color(0xFF3E1F7F)
+                color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             // Search
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
                 placeholder = { Text("Search by name or role") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                singleLine = true,
+                leadingIcon = {
+                   Icon(painter = painterResource(android.R.drawable.ic_menu_search), contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) 
+                }
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             // List
             if (isLoading && candidateList.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else if (candidateList.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No pending candidates found.")
+                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle, 
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text("No pending approvals", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             } else {
-                LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(20.dp), modifier = Modifier.fillMaxSize()) {
+                LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
                     items(filteredList, key = { it.id ?: kotlin.random.Random.nextInt().toString() }) { candidate ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showDetailFor = candidate }
+                        
+                        // User Card
+                        ElevatedCard(
+                            onClick = { showDetailFor = candidate },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.medium,
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
-                            // Reusing Row UI but mapping Candidate model
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Avatar Placeholder
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            candidate.name?.take(1) ?: "?", 
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                        )
+                                    }
+                                }
+                                
+                                Spacer(Modifier.width(16.dp))
+
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(candidate.name ?: "Unknown", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                    Text(candidate.position ?: "No Position", color = Color.Gray, fontSize = 14.sp)
-                                    Text("Status: ${candidate.status ?: "Pending"}", color = if(candidate.status == "approved") Color.Green else Color.Blue, fontSize = 12.sp)
+                                    Text(
+                                        candidate.name ?: "Unknown", 
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        candidate.position ?: "No Position", 
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    
+                                    Spacer(Modifier.height(4.dp))
+                                    
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = if(candidate.status == "approved") SoftGreen.copy(alpha=0.1f) else MaterialTheme.colorScheme.primaryContainer
+                                    ) {
+                                        Text(
+                                            candidate.status ?: "Pending", 
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if(candidate.status == "approved") SoftGreen else MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
 
-                                // Action Buttons
-                                Row {
-                                    Button(
+                                // Action Buttons (Compact)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    FilledIconButton(
                                         onClick = { viewModel.approveCandidate(candidate.id ?: "") },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                                        modifier = Modifier.height(36.dp)
+                                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = SoftGreen),
+                                        modifier = Modifier.size(36.dp)
                                     ) {
-                                        Text("Approve", fontSize = 12.sp)
+                                        Icon(painter = painterResource(android.R.drawable.ic_input_add), contentDescription = "Approve", tint = Color.White) // Should ideally be check
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    OutlinedButton(
+                                    FilledIconButton(
                                         onClick = { viewModel.rejectCandidate(candidate.id ?: "") },
-                                        modifier = Modifier.height(36.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.error),
+                                        modifier = Modifier.size(36.dp)
                                     ) {
-                                        Text("Reject", fontSize = 12.sp)
+                                        Icon(painter = painterResource(android.R.drawable.ic_delete), contentDescription = "Reject", tint = Color.White)
                                     }
                                 }
                             }
@@ -219,23 +285,29 @@ fun AdminHomeScreen(navController: NavController) {
     showDetailFor?.let { cand ->
         AlertDialog(
             onDismissRequest = { showDetailFor = null },
-            title = { Text(cand.name ?: "Unknown") },
+            icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }, // Placeholder icon
+            title = { Text(cand.name ?: "Candidate Details") },
             text = {
-                Column {
-                    Text("Details:")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Applied for: ${cand.position ?: "N/A"}")
                     Text("Role: ${cand.role ?: "N/A"}")
-                    Text("Manifesto: ${cand.manifesto ?: "N/A"}")
-                    Text("Status: ${cand.status ?: "N/A"}")
+                    Text("Manifesto:", fontWeight = FontWeight.Bold)
+                    Text(cand.manifesto ?: "No manifesto provided.", style = MaterialTheme.typography.bodyMedium)
+                    
+                    Spacer(Modifier.height(8.dp))
+                    Text("Status: ${cand.status ?: "N/A"}", color = MaterialTheme.colorScheme.primary)
                 }
             },
             confirmButton = {
                 Button(onClick = { viewModel.approveCandidate(cand.id ?: ""); showDetailFor = null }) {
-                    Text("Approve")
+                    Text("Approve Application")
                 }
             },
             dismissButton = {
-                OutlinedButton(onClick = { viewModel.rejectCandidate(cand.id ?: ""); showDetailFor = null }) {
+                OutlinedButton(
+                    onClick = { viewModel.rejectCandidate(cand.id ?: ""); showDetailFor = null },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
                     Text("Reject")
                 }
             }

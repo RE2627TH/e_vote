@@ -4,10 +4,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import kotlinx.coroutines.delay
@@ -30,34 +31,48 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    val viewModel: com.example.s_vote.viewmodel.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: com.example.s_vote.viewmodel.HomeViewModel = viewModel()
     val electionStatus by viewModel.electionStatus.collectAsState()
     val days by viewModel.countdownDays.collectAsState()
     val hours by viewModel.countdownHours.collectAsState()
     val minutes by viewModel.countdownMinutes.collectAsState()
     val seconds by viewModel.countdownSeconds.collectAsState()
 
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF7669E1),
+            Color(0xFFAF88F8),
+            Color(0xFFCCC4F1)
+        )
+    )
+
     Scaffold(
-        bottomBar = { BottomNavBar(navController, selectedRoute = Routes.HOME) }
+        bottomBar = { BottomNavBar(navController, selectedRoute = Routes.HOME) },
+        containerColor = Color.Transparent
     ) { padding ->
 
-        Column(
+        Box(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFFF8F7FF), Color(0xFFEFE6FF))
-                    )
-                )
+                .background(backgroundGradient)
         ) {
+            // Aesthetic Glows
+            Box(
+                modifier = Modifier
+                    .size(300.dp)
+                    .offset(y = (-50).dp, x = (-50).dp)
+                    .background(Color(0xFFFF3DA6).copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape)
+                    .align(Alignment.TopStart)
+            )
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
-                    .fillMaxWidth()
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp),
             ) {
+                Spacer(modifier = Modifier.height(32.dp))
 
                 // ---------- HEADER ----------
                 Row(
@@ -68,160 +83,151 @@ fun HomeScreen(navController: NavController) {
                     Column {
                         Text(
                             "Welcome Back! 👋",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
                         )
                         Text(
-                            "Make your vote count today",
-                            fontSize = 13.sp,
-                            color = Color.Black
-                                .copy(alpha = 0.7f)
+                            "Let's shape the future today",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.6f)
                         )
                     }
 
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(Color(0xFF6A4CFF)),
+                            .size(54.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(Color.White.copy(alpha = 0.1f))
+                            .border(
+                                1.dp, 
+                                Color.White.copy(alpha = 0.2f), 
+                                RoundedCornerShape(18.dp)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("🗳️", fontSize = 20.sp)
+                        Text("🗳️", fontSize = 24.sp)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 // ---------- COUNTDOWN ----------
+                Text(
+                    "Election Live Countdown",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = 2.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 
-                // Controlled by ViewModel now
-
+                // Modern Countdown Card (Glassmorphism)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color(0xFFC9A7E6).copy(alpha = 0.8f),
-                                    Color(0xFFD8BBDC).copy(alpha = 0.8f)
-                                )
-                            )
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)),
+                            RoundedCornerShape(32.dp)
                         )
-                        .padding(10.dp)
+                        .padding(24.dp)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Countdown",
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            (electionStatus.title ?: "General Election").uppercase(),
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
                         )
-                        Spacer(modifier = Modifier.height(1.dp))
-                        Text(
-                            electionStatus.title ?: "Election",
-                            fontSize = 16.sp,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                        Spacer(modifier = Modifier.height(1.dp))
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        // Time boxes row
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            CountdownBox(days, "days")
-                            CountdownBox(hours, "hours")
-                            CountdownBox(minutes, "mins")
-                            CountdownBox(seconds, "sec")
+                            CountdownBox(days, "DAYS")
+                            CountdownBox(hours, "HOURS")
+                            CountdownBox(minutes, "MINS")
+                            CountdownBox(seconds, "SECS")
                         }
-
-                        Spacer(modifier = Modifier.height(15.dp))
-
-
-
                     }
                 }
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 // ---------- ROLE SELECTION ----------
                 Text(
-                    "Select Position to Vote",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-
+                    "Select Position",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = 2.sp
                 )
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(270.dp),
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-
-                    items(roleList) { role ->
-
-                        // 🔥 IMPORTANT FIX: normalize role name
-                        val safeRoleName =
-                            role.name.lowercase().replace(" ", "_")
-
-                        RoleCard(
-                            roleName = role.name,
-                            icon = role.icon,
-                            onClick = {
-                                navController.navigate(
-                                    Routes.CANDIDATE_LIST.replace(
-                                        "{roleName}",
-                                        safeRoleName
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // ---------- LEARN MORE ----------
-                Text(
-                    "Learn More",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-
-                    item {
-                        InfoCard("📋", "Manifestos") {
-                            navController.navigate(Routes.MANIFESTO)
-                        }
-                    }
-
-                    item {
-                        InfoCard("❓", "FAQs") {
-                            navController.navigate(Routes.FAQ)
-                        }
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                roleList.chunked(3).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        rowItems.forEach { role ->
+                            val safeRoleName = role.name.lowercase().replace(" ", "_")
+                            Box(modifier = Modifier.weight(1f)) {
+                                RoleCard(
+                                    roleName = role.name,
+                                    icon = role.icon,
+                                    onClick = {
+                                        navController.navigate(
+                                            Routes.CANDIDATE_LIST.replace("{roleName}", safeRoleName)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                        if (rowItems.size < 3) {
+                            repeat(3 - rowItems.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // ---------- RESOURCES ----------
+                Text(
+                    "Election Resources",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    letterSpacing = 2.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    InfoCard("📋", "Manifestos", Modifier.weight(1f)) {
+                        navController.navigate(Routes.MANIFESTO)
+                    }
+                    
+                    InfoCard("❓", "FAQs", Modifier.weight(1f)) {
+                        navController.navigate(Routes.FAQ)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }
@@ -231,82 +237,102 @@ fun HomeScreen(navController: NavController) {
 fun RoleCard(roleName: String, icon: Int, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
-            .shadow(4.dp)
-            .clickable(onClick = onClick)
-            .padding(12.dp),
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(
+                1.dp,
+                Color.White.copy(alpha = 0.1f),
+                RoundedCornerShape(24.dp)
+            )
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Image(
                 painter = painterResource(icon),
                 contentDescription = roleName,
                 modifier = Modifier.size(36.dp)
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                roleName.replace(" ", "\n"),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF6A4CFF),
-                textAlign = TextAlign.Center
+                roleName.uppercase(),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                lineHeight = 12.sp,
+                letterSpacing = 1.sp
             )
         }
     }
 }
 
 @Composable
-fun InfoCard(emoji: String, title: String, onClick: () -> Unit) {
+fun InfoCard(emoji: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .height(100.dp)
-            .width(140.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(Color(0xFFE04EF6), Color(0xFFB79AFE))
-                )
+        modifier = modifier
+            .height(74.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(
+                1.dp,
+                Color.White.copy(alpha = 0.1f),
+                RoundedCornerShape(24.dp)
             )
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.CenterStart
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(emoji, fontSize = 32.sp)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(title, color = Color.White, fontWeight = FontWeight.Bold)
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(emoji, fontSize = 24.sp)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                title.uppercase(), 
+                fontSize = 12.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
         }
     }
 }
 
 @Composable
 fun CountdownBox(value: String, label: String) {
-    Box(
-        modifier = Modifier
-            .width(70.dp)
-            .height(80.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFF8B6BB9).copy(alpha = 0.7f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .border(
+                    1.dp,
+                    Color.White.copy(alpha = 0.2f),
+                    RoundedCornerShape(18.dp)
+                ),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 value,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                label,
-                fontSize = 11.sp,
-                color = Color.White.copy(alpha = 0.9f)
+                fontSize = 20.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Black
             )
         }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            label,
+            fontSize = 9.sp,
+            color = Color.White.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
     }
 }

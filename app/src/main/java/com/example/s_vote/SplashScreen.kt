@@ -3,6 +3,8 @@ package com.example.s_vote
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -11,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -27,90 +30,142 @@ fun SplashScreen(navController: NavController) {
     // animation states
     var startAnim by remember { mutableStateOf(false) }
 
-    // scale animation (0.6 -> 1.0)
+    // Enhanced entrance animations
     val scale by animateFloatAsState(
-        targetValue = if (startAnim) 1f else 0.7f,
-        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing)
+        targetValue = if (startAnim) 1f else 0.4f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     )
 
-    // fade animation
     val alpha by animateFloatAsState(
         targetValue = if (startAnim) 1f else 0f,
-        animationSpec = tween(durationMillis = 700)
+        animationSpec = tween(durationMillis = 1000)
     )
 
     // start the animation and then wait -> navigate
     LaunchedEffect(Unit) {
-        // small delay then animate in
         startAnim = true
-        // show splash for 2000 ms total (adjust as needed)
-        delay(2000)
+        delay(2500)
         navController.navigate(Routes.LOGIN) {
             popUpTo(Routes.SPLASH) { inclusive = true }
         }
     }
 
-    // background: vertical gradient (deep indigo -> purple -> magenta)
-    val gradientBrush = androidx.compose.ui.graphics.Brush.verticalGradient(
+    // Modern Vibrant Gradient (Indigo -> Royal Blue -> Violet)
+    val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            androidx.compose.ui.graphics.Color(0xFF30216E),
-            androidx.compose.ui.graphics.Color(0xFF6A4CFF),
-            androidx.compose.ui.graphics.Color(0xFFFF3DA6)
+            androidx.compose.ui.graphics.Color(0xFF0F0533),
+            androidx.compose.ui.graphics.Color(0xFF2104A1),
+            androidx.compose.ui.graphics.Color(0xFF6743FF)
         )
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = gradientBrush)
+            .background(brush = backgroundGradient)
     ) {
-        // main content
+        // Subtle background blur/glow effects (Circles)
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .offset(y = (-50).dp, x = (-50).dp)
+                .background(androidx.compose.ui.graphics.Color(0xFFFF3DA6).copy(alpha = 0.15f), CircleShape)
+                .align(Alignment.TopStart)
+        )
+        
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .offset(y = 100.dp, x = 100.dp)
+                .background(androidx.compose.ui.graphics.Color(0xFF2E7D32).copy(alpha = 0.1f), CircleShape)
+                .align(Alignment.BottomEnd)
+        )
+
+        // Main content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(bottom = 80.dp), // Pushed up slightly
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // badge: rounded square with thumb icon
+            // Glassmorphism Logo Container
             Box(
                 modifier = Modifier
-                    .size(110.dp)
+                    .size(140.dp)
                     .scale(scale)
                     .alpha(alpha)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(androidx.compose.ui.graphics.Color(0xFF3E1F7F)),
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f))
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            listOf(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.3f), androidx.compose.ui.graphics.Color.Transparent)
+                        ),
+                        shape = RoundedCornerShape(32.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                // icon (vector drawable)
+                // Outer glow shadow effect
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(androidx.compose.ui.graphics.Color(0xFF6743FF).copy(alpha = 0.3f), CircleShape)
+                )
+                
                 Image(
                     painter = painterResource(id = R.drawable.ic_thumb_up),
-                    contentDescription = "thumb",
-                    modifier = Modifier.size(48.dp),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(60.dp),
                     contentScale = ContentScale.Fit
                 )
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // pill title
+            // Premium Title with Letter Spacing
+            Text(
+                text = "E-VOTE",
+                color = androidx.compose.ui.graphics.Color.White,
+                fontWeight = FontWeight.Black,
+                fontSize = 36.sp,
+                letterSpacing = 4.sp,
+                modifier = Modifier.alpha(alpha)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Pill Subtitle
             Box(
                 modifier = Modifier
-                    .width(240.dp)
-                    .height(42.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(androidx.compose.ui.graphics.Color(0xFF29123F).copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.08f))
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .alpha(alpha)
             ) {
-                Text("E-Vote", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                Text(
+                    text = "Secure • Verified • Fast",
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 1.sp
+                )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Secure & verified Election",
-                fontSize = 14.sp,
-                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
-            )
         }
+        
+        // Bottom Loading/Version Indicator
+        Text(
+            text = "PREMIUM EDITION",
+            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.3f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 40.dp)
+        )
     }
 }

@@ -92,6 +92,11 @@ interface ApiService {
         @Query("user_id") userId: String
     ): Response<ProfileResponse>
 
+    @GET("get_vote_history.php")
+    suspend fun getVoteHistory(
+        @Query("voter_id") voterId: String
+    ): Response<List<VoteHistoryItem>>
+
 
     /* =======================
        6. ADMIN
@@ -116,9 +121,22 @@ interface ApiService {
         @Body request: CreateElectionRequest
     ): Response<GenericResponse>
 
+    @POST("publish_results.php")
+    suspend fun publishResults(): Response<GenericResponse>
+
     @GET("get_active_election.php")
     suspend fun getActiveElection(): Response<ElectionStatus>
 
     @GET("dashboard_stats.php")
     suspend fun getDashboardStats(): Response<AdminDashboardStatsResponse>
+
+    /* =======================
+       7. OCR (PYTHON SERVER)
+       ======================= */
+
+    @Multipart
+    @POST("ocr")
+    suspend fun uploadOcrImage(
+        @Part image: MultipartBody.Part
+    ): Response<OcrResponse>
 }
