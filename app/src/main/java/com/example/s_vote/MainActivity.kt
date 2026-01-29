@@ -3,7 +3,7 @@ package com.example.s_vote
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.s_vote.ui.theme.SvoteTheme
+import com.example.s_vote.ui.theme.EvoteTheme
 import androidx.navigation.compose.rememberNavController
 import com.example.s_vote.navigation.AppNavGraph
 
@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SvoteTheme {
+            EvoteTheme {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)
             }

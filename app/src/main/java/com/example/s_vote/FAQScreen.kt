@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.ui.unit.sp
+import com.example.s_vote.ui.theme.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +29,9 @@ fun FAQScreen(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1B039A),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -44,7 +47,7 @@ fun FAQScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)   // 👈 ADD THIS
+                .background(BackgroundLight)
                 .padding(padding)
                 .padding(16.dp)
         ) {
@@ -54,14 +57,25 @@ fun FAQScreen(navController: NavController) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    elevation = CardDefaults.cardElevation(6.dp),
-                    shape = RoundedCornerShape(20.dp)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(question, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(answer)
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            question.uppercase(),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Black,
+                            color = Primary,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            answer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary
+                        )
                     }
                 }
             }

@@ -18,9 +18,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val loginState = _loginState.asStateFlow()
 
     /**
-     * Login Function
+     * Login Function with Role Verification
      */
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, intendedRole: String) {
         _loginState.value = LoginState.Loading
 
         viewModelScope.launch {
@@ -31,36 +31,44 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!
-                    Log.d("LoginViewModel", "API Response: $result") // 👈 ADDED LOGGING
+                    Log.d("LoginViewModel", "API Response: $result")
 
                     if (result.success) {
+                        val actualRole = result.role?.trim()?.lowercase() ?: ""
+                        val intended = intendedRole.trim().lowercase()
 
-                        // ✅ Save session data
-                        val sharedPref = getApplication<Application>()
-                            .getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
+                        // Role Verification
+                        // Handle students which might come back as 'student' or 'user' depending on DB
+                        val isStudentMatch = (intended == "student" && (actualRole == "student" || actualRole == "user"))
+                        val isExactMatch = actualRole == intended
 
-                        sharedPref.edit()
-                            .putString("USER_ID", result.user_id.toString())
-                            .putString("STUDENT_ID", result.student_id)
-                            .putString("USER_ROLE", result.role)
-                            .putBoolean("IS_LOGGED_IN", true)
-                            .apply()
+                        if (isExactMatch || isStudentMatch) {
+                            // ✅ Save session data only if roles match
+                            val sharedPref = getApplication<Application>()
+                                .getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
 
-                        _loginState.value = LoginState.Success(result.role ?: "")
+                            sharedPref.edit()
+                                .putString("USER_ID", result.user_id.toString())
+                                .putString("STUDENT_ID", result.student_id)
+                                .putString("USER_ROLE", result.role)
+                                .putBoolean("IS_LOGGED_IN", true)
+                                .apply()
+
+                            _loginState.value = LoginState.Success(result.role ?: "")
+                        } else {
+                            _loginState.value = LoginState.Error("Access Denied: You do not have $intendedRole privileges on this portal.")
+                        }
 
                     } else {
-                        _loginState.value =
-                            LoginState.Error(result.message ?: "Login failed")
+                        _loginState.value = LoginState.Error(result.message ?: "Login failed")
                     }
 
                 } else {
-                    _loginState.value =
-                        LoginState.Error("Server error: ${response.code()}")
+                    _loginState.value = LoginState.Error("Server error: ${response.code()}")
                 }
 
             } catch (e: Exception) {
-                _loginState.value =
-                    LoginState.Error("Connection Failed: ${e.message ?: "Unknown error"}")
+                _loginState.value = LoginState.Error("Connection Failed: ${e.message ?: "Unknown error"}")
             }
         }
     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
@@ -40,15 +41,14 @@ fun HomeScreen(navController: NavController) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF7669E1),
-            Color(0xFFAF88F8),
-            Color(0xFFCCC4F1)
+            BackgroundLight,
+            SurfaceLight
         )
     )
 
     Scaffold(
         bottomBar = { BottomNavBar(navController, selectedRoute = Routes.HOME) },
-        containerColor = Color.Transparent
+        containerColor = BackgroundLight
     ) { padding ->
 
         Box(
@@ -60,8 +60,8 @@ fun HomeScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .size(300.dp)
-                    .offset(y = (-50).dp, x = (-50).dp)
-                    .background(Color(0xFFFF3DA6).copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape)
+                    .offset(y = (-80).dp, x = (-80).dp)
+                    .background(Primary.copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape)
                     .align(Alignment.TopStart)
             )
 
@@ -84,30 +84,30 @@ fun HomeScreen(navController: NavController) {
                         Text(
                             "Welcome Back! 👋",
                             style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
+                            color = TextPrimary,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.sp
                         )
                         Text(
                             "Let's shape the future today",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.6f)
+                            color = TextSecondary
                         )
                     }
 
                     Box(
                         modifier = Modifier
-                            .size(54.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Secondary.copy(alpha = 0.1f))
                             .border(
                                 1.dp, 
-                                Color.White.copy(alpha = 0.2f), 
-                                RoundedCornerShape(18.dp)
+                                Secondary.copy(alpha = 0.2f), 
+                                RoundedCornerShape(12.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("🗳️", fontSize = 24.sp)
+                        Text("🗳️", fontSize = 20.sp)
                     }
                 }
 
@@ -116,24 +116,19 @@ fun HomeScreen(navController: NavController) {
                 // ---------- COUNTDOWN ----------
                 Text(
                     "Election Live Countdown",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
                     letterSpacing = 2.sp
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
-                // Modern Countdown Card (Glassmorphism)
+                // Modern Countdown Card - Deep Professional
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(
-                            1.dp,
-                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)),
-                            RoundedCornerShape(32.dp)
-                        )
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
                         .padding(24.dp)
                 ) {
                     Column(
@@ -142,13 +137,13 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Text(
                             (electionStatus.title ?: "General Election").uppercase(),
-                            fontSize = 18.sp,
-                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextPrimary,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 2.sp
                         )
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -167,10 +162,9 @@ fun HomeScreen(navController: NavController) {
 
                 // ---------- ROLE SELECTION ----------
                 Text(
-                    "Select Position",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    "Candidate Categories",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
                     letterSpacing = 2.sp
                 )
 
@@ -209,9 +203,8 @@ fun HomeScreen(navController: NavController) {
                 // ---------- RESOURCES ----------
                 Text(
                     "Election Resources",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
                     letterSpacing = 2.sp
                 )
 
@@ -239,34 +232,33 @@ fun RoleCard(roleName: String, icon: Int, onClick: () -> Unit) {
         modifier = Modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(SurfaceLight)
             .border(
                 1.dp,
-                Color.White.copy(alpha = 0.1f),
+                OutlineColor,
                 RoundedCornerShape(24.dp)
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
                 painter = painterResource(icon),
                 contentDescription = roleName,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(40.dp)
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 roleName.uppercase(),
-                fontSize = 10.sp,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = TextPrimary,
                 textAlign = TextAlign.Center,
-                lineHeight = 12.sp,
-                letterSpacing = 1.sp
+                lineHeight = 14.sp
             )
         }
     }
@@ -276,12 +268,12 @@ fun RoleCard(roleName: String, icon: Int, onClick: () -> Unit) {
 fun InfoCard(emoji: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
-            .height(74.dp)
+            .height(80.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(SurfaceLight)
             .border(
                 1.dp,
-                Color.White.copy(alpha = 0.1f),
+                OutlineColor,
                 RoundedCornerShape(24.dp)
             )
             .clickable(onClick = onClick),
@@ -295,8 +287,8 @@ fun InfoCard(emoji: String, title: String, modifier: Modifier = Modifier, onClic
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 title.uppercase(), 
-                fontSize = 12.sp,
-                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                color = TextPrimary,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp
             )
@@ -309,29 +301,29 @@ fun CountdownBox(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color.White.copy(alpha = 0.1f))
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(BackgroundLight)
                 .border(
                     1.dp,
-                    Color.White.copy(alpha = 0.2f),
-                    RoundedCornerShape(18.dp)
+                    OutlineColor,
+                    RoundedCornerShape(16.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 value,
-                fontSize = 20.sp,
-                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                color = Primary,
                 fontWeight = FontWeight.Black
             )
         }
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             label,
-            fontSize = 9.sp,
-            color = Color.White.copy(alpha = 0.5f),
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall,
+            color = TextSecondary,
+            fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.sp
         )
     }

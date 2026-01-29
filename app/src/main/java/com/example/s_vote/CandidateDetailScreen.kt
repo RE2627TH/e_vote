@@ -19,6 +19,7 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -29,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.CandidateViewModel
+import com.example.s_vote.ui.theme.*
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -80,9 +82,8 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
+            BackgroundLight,
+            SurfaceLight
         )
     )
 
@@ -92,20 +93,20 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                 title = { 
                     Text(
                         "CANDIDATE PROFILE",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        letterSpacing = 2.sp
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        letterSpacing = 1.sp
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         },
@@ -117,12 +118,12 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                 .fillMaxSize()
                 .background(backgroundGradient)
         ) {
-            // Background Glow
+            // Background Glow - Subtler
             Box(
                 modifier = Modifier
                     .size(300.dp)
                     .offset(y = (-50).dp, x = (-100).dp)
-                    .background(Color(0xFFFF3DA6).copy(alpha = 0.08f), CircleShape)
+                    .background(Secondary.copy(alpha = 0.05f), CircleShape)
                     .align(Alignment.TopStart)
             )
 
@@ -141,13 +142,13 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                 ) {
                     Spacer(Modifier.height(32.dp))
 
-                    // Premium Profile Section (Glassmorphic)
+                    // Premium Profile Section
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -155,10 +156,10 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                             // Avatar
                             Box(
                                 modifier = Modifier
-                                    .size(110.dp)
+                                    .size(120.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .border(2.dp, Color(0xFF6743FF), CircleShape)
+                                    .background(BackgroundLight)
+                                    .border(2.dp, Primary, CircleShape)
                                     .padding(4.dp)
                                     .clip(CircleShape)
                             ) {
@@ -187,9 +188,9 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
 
                             Text(
                                 (candidate.name ?: "UNKNOWN").uppercase(),
-                                fontSize = 22.sp,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Black,
-                                color = Color.White,
+                                color = TextPrimary,
                                 letterSpacing = 1.sp
                             )
                             
@@ -197,14 +198,14 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                                 modifier = Modifier
                                     .padding(top = 8.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.1f))
+                                    .background(Primary.copy(alpha = 0.05f))
                                     .padding(horizontal = 12.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     (candidate.position ?: "CANDIDATE").uppercase(),
-                                    fontSize = 11.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.7f),
+                                    color = Primary,
                                     letterSpacing = 1.sp
                                 )
                             }
@@ -213,12 +214,12 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Manifesto Section (Glassmorphic)
+                    // Manifesto Section
                     Text(
                         "CANDIDATE MANIFESTO",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        color = TextPrimary,
                         letterSpacing = 2.sp,
                         modifier = Modifier.align(Alignment.Start).padding(start = 4.dp)
                     )
@@ -227,15 +228,15 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
-                            .padding(20.dp)
+                            .background(SurfaceLight)
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+                            .padding(24.dp)
                     ) {
                         Text(
                             candidate.manifesto ?: "No manifesto provided.",
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.8f),
-                            lineHeight = 22.sp
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = TextPrimary,
+                            lineHeight = 26.sp
                         )
                     }
 
@@ -251,13 +252,12 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                     ) {
                         Text(
                             "STUDENT REVIEWS",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary,
                             letterSpacing = 2.sp
                         )
                         TextButton(onClick = { showFeedbackDialog = true }) {
-                            Text("ADD REVIEW", color = Color(0xFF6743FF), fontWeight = FontWeight.Black, fontSize = 11.sp)
+                            Text("ADD REVIEW", color = Secondary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         }
                     }
                     
@@ -267,25 +267,25 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
-                            .padding(20.dp)
+                            .background(SurfaceLight)
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+                            .padding(24.dp)
                     ) {
                         if (candidate.feedback.isNullOrEmpty()) {
-                            Text("No reviews yet.", fontSize = 14.sp, color = Color.White.copy(alpha = 0.4f))
+                            Text("No reviews yet.", fontSize = 14.sp, color = TextSecondary.copy(alpha = 0.6f))
                         } else {
                             Column {
                                 candidate.feedback.take(3).forEachIndexed { index, feedback ->
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = if(index < 2) 16.dp else 0.dp)) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(feedback.userName.uppercase(), fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.White)
+                                            Text(feedback.userName.uppercase(), style = MaterialTheme.typography.labelLarge, color = TextPrimary, fontWeight = FontWeight.Bold)
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("★ ${feedback.rating}", fontSize = 11.sp, color = Color(0xFFFFB300), fontWeight = FontWeight.Bold)
+                                            Text("★ ${feedback.rating}", style = MaterialTheme.typography.labelSmall, color = Warning, fontWeight = FontWeight.Bold)
                                         }
-                                        Text(feedback.comment, fontSize = 13.sp, color = Color.White.copy(alpha = 0.6f))
-                                        if (index < 2 && candidate.feedback.size > 1) {
+                                        Text(feedback.comment, style = MaterialTheme.typography.bodyMedium, color = TextPrimary.copy(alpha = 0.8f))
+                                        if (index < 2 && candidate.feedback.size > index + 1) {
                                             Spacer(Modifier.height(16.dp))
-                                            HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+                                            HorizontalDivider(color = OutlineColor)
                                         }
                                     }
                                 }
@@ -302,8 +302,8 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
 
                         AlertDialog(
                             onDismissRequest = { showFeedbackDialog = false },
-                            containerColor = Color(0xFF1E0B6E),
-                            title = { Text("RATE CANDIDATE", color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp) },
+                            containerColor = SurfaceLight,
+                            title = { Text("RATE CANDIDATE", style = MaterialTheme.typography.titleLarge, color = TextPrimary, fontWeight = FontWeight.Black) },
                             text = {
                                 Column {
                                     Row(
@@ -324,14 +324,18 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                                     OutlinedTextField(
                                         value = comment,
                                         onValueChange = { comment = it },
-                                        placeholder = { Text("Write your feedback...", color = Color.White.copy(alpha = 0.3f)) },
+                                        placeholder = { Text("Write your feedback...", color = TextSecondary.copy(alpha = 0.6f)) },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(16.dp),
                                         colors = OutlinedTextFieldDefaults.colors(
-                                            focusedTextColor = Color.White,
-                                            unfocusedTextColor = Color.White,
-                                            focusedBorderColor = Color.White.copy(alpha = 0.4f),
-                                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+                                            focusedTextColor = TextPrimary,
+                                            unfocusedTextColor = TextPrimary,
+                                            focusedContainerColor = BackgroundLight,
+                                            unfocusedContainerColor = BackgroundLight,
+                                            focusedBorderColor = Primary,
+                                            unfocusedBorderColor = OutlineColor,
+                                            focusedLabelColor = Primary,
+                                            unfocusedLabelColor = TextSecondary
                                         )
                                     )
                                 }
@@ -348,15 +352,15 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                                             }
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("SUBMIT", fontWeight = FontWeight.Black)
+                                    Text("SUBMIT", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showFeedbackDialog = false }) {
-                                    Text("CANCEL", color = Color.White.copy(alpha = 0.5f))
+                                    Text("CANCEL", style = MaterialTheme.typography.labelLarge, color = TextSecondary)
                                 }
                             }
                         )
@@ -386,21 +390,20 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(Color(0xFF2E7D32).copy(alpha = 0.15f))
-                                .border(1.dp, Color(0xFF2E7D32).copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(SuccessMild.copy(alpha = 0.2f))
+                                .border(1.dp, SuccessMild, RoundedCornerShape(16.dp))
                                 .padding(20.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     "VOTED SUCCESSFULLY",
-                                    color = Color(0xFF4CAF50),
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 12.sp,
-                                    letterSpacing = 1.sp
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Black
                                 )
                             }
                         }
@@ -419,9 +422,9 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                                 .height(60.dp),
                             shape = RoundedCornerShape(30.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6743FF)
+                                containerColor = Primary
                             ),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
                             enabled = historyState !is com.example.s_vote.viewmodel.VoteHistoryState.Loading
                         ) {
                             if (historyState is com.example.s_vote.viewmodel.VoteHistoryState.Loading) {
@@ -429,9 +432,9 @@ fun CandidateDetailScreen(navController: NavController, candidateId: String) {
                             } else {
                                 Text(
                                     "CAST YOUR VOTE", 
-                                    fontSize = 16.sp, 
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 2.sp
+                                    letterSpacing = 1.sp
                                 )
                             }
                         }

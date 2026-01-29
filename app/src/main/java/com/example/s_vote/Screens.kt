@@ -18,60 +18,65 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 
 // ------------------- BOTTOM NAV BAR (Shared across all screens) -------------------
 @Composable
 fun BottomNavBar(navController: NavController, selectedRoute: String) {
     NavigationBar(
-        containerColor = Color.White,
-        modifier = Modifier.shadow(elevation = 8.dp)
+        containerColor = SurfaceLight,
+        tonalElevation = 0.dp
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            label = { Text("Home") },
+            label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.HOME,
             onClick = { navController.navigate(Routes.HOME) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                unselectedIconColor = Color.Black.copy(alpha = 0.6f),
-                unselectedTextColor = Color.Black.copy(alpha = 0.6f)
+                selectedIconColor = Primary,
+                selectedTextColor = Primary,
+                unselectedIconColor = TextSecondary,
+                unselectedTextColor = TextSecondary,
+                indicatorColor = Primary.copy(alpha = 0.1f)
             )
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Poll, contentDescription = null) },
-            label = { Text("Result") },
+            label = { Text("Result", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.RESULT,
             onClick = { navController.navigate(Routes.RESULT) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                unselectedIconColor = Color.Black.copy(alpha = 0.6f),
-                unselectedTextColor = Color.Black.copy(alpha = 0.6f)
+                selectedIconColor = Primary,
+                selectedTextColor = Primary,
+                unselectedIconColor = TextSecondary,
+                unselectedTextColor = TextSecondary,
+                indicatorColor = Primary.copy(alpha = 0.1f)
             )
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.History, contentDescription = null) },
-            label = { Text("History") },
+            label = { Text("History", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.POLL_HISTORY,
             onClick = { navController.navigate(Routes.POLL_HISTORY) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                unselectedIconColor = Color.Black.copy(alpha = 0.6f),
-                unselectedTextColor = Color.Black.copy(alpha = 0.6f)
+                selectedIconColor = Primary,
+                selectedTextColor = Primary,
+                unselectedIconColor = TextSecondary,
+                unselectedTextColor = TextSecondary,
+                indicatorColor = Primary.copy(alpha = 0.1f)
             )
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Person, contentDescription = null) },
-            label = { Text("Profile") },
+            label = { Text("Profile", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.PROFILE,
             onClick = { navController.navigate(Routes.PROFILE) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                selectedTextColor = MaterialTheme.colorScheme.surface,
-                unselectedIconColor = Color.Black.copy(alpha = 0.6f),
-                unselectedTextColor = Color.Black.copy(alpha = 0.6f)
+                selectedIconColor = Primary,
+                selectedTextColor = Primary,
+                unselectedIconColor = TextSecondary,
+                unselectedTextColor = TextSecondary,
+                indicatorColor = Primary.copy(alpha = 0.1f)
             )
         )
     }

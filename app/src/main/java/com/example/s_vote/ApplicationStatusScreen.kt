@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.CandidateApplicationViewModel
+import com.example.s_vote.ui.theme.*
+import androidx.compose.foundation.border
 
 @Composable
 fun ApplicationStatusScreen(navController: NavController, applicationId: String) {
@@ -46,20 +48,20 @@ fun ApplicationStatusScreen(navController: NavController, applicationId: String)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White)
+                    .background(BackgroundLight)
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 // Status icon and color
                 val (icon, color, statusText) = when (status) {
-                    "approved" -> Triple(Icons.Default.CheckCircle, Color(0xFF4CAF50), "APPROVED ✓")
-                    "rejected" -> Triple(Icons.Default.Error, Color(0xFFFF6B6B), "REJECTED")
-                    else -> Triple(Icons.Default.Schedule, Color(0xFFFFA500), "PENDING")
+                    "approved" -> Triple(Icons.Default.CheckCircle, Success, "APPROVED ✓")
+                    "rejected" -> Triple(Icons.Default.Error, Error, "REJECTED")
+                    else -> Triple(Icons.Default.Schedule, Warning, "PENDING")
                 }
                 
                 Icon(
-                    icon,
+                    imageVector = icon,
                     contentDescription = statusText,
                     modifier = Modifier.size(80.dp),
                     tint = color
@@ -67,24 +69,37 @@ fun ApplicationStatusScreen(navController: NavController, applicationId: String)
                 
                 Spacer(Modifier.height(20.dp))
                 
-                Text(statusText, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = color)
+                Text(
+                    text = statusText, 
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Black, 
+                    color = color,
+                    letterSpacing = 2.sp
+                )
                 
                 Spacer(Modifier.height(16.dp))
                 
-                Text(message, fontSize = 16.sp, color = Color.Gray, modifier = Modifier.fillMaxWidth(0.9f))
+                Text(
+                    message, 
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary, 
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                )
                 
                 if (status == "rejected" && rejection != null) {
                     Spacer(Modifier.height(20.dp))
                     Card(
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
-                            .clip(RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                            .clip(RoundedCornerShape(24.dp))
+                            .border(1.dp, Error.copy(alpha = 0.5f), RoundedCornerShape(24.dp)),
+                        colors = CardDefaults.cardColors(containerColor = Error.copy(alpha = 0.1f))
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Reason for Rejection:", fontWeight = FontWeight.Bold, color = Color.Red)
+                        Column(modifier = Modifier.padding(24.dp)) {
+                            Text("REJECTION REASON", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Error)
                             Spacer(Modifier.height(8.dp))
-                            Text(rejection, fontSize = 14.sp)
+                            Text(rejection, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                         }
                     }
                 }
@@ -96,21 +111,24 @@ fun ApplicationStatusScreen(navController: NavController, applicationId: String)
                         onClick = { navController.navigate(Routes.LOGIN) },
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
-                            .height(50.dp),
+                            .height(56.dp),
+                        shape = RoundedCornerShape(28.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
+                            containerColor = Success
                         )
                     ) {
-                        Text("Login as Candidate", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("LOGIN AS CANDIDATE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     }
                 } else {
                     Button(
                         onClick = { navController.popBackStack() },
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
-                            .height(50.dp)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {
-                        Text("Back", fontSize = 16.sp)
+                        Text("BACK", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     }
                 }
             }

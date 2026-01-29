@@ -12,17 +12,17 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.graphics.Color
 
-// We prioritize Light Theme as per user request
+// We prioritize a Deep Professional Theme as per user request
 private val LightColorScheme = lightColorScheme(
     primary = Primary,
-    onPrimary = SurfaceLight,
-    primaryContainer = Primary.copy(alpha = 0.1f),
-    onPrimaryContainer = PrimaryDark,
+    onPrimary = Color.White,
+    primaryContainer = Primary.copy(alpha = 0.2f),
+    onPrimaryContainer = Secondary,
     
     secondary = Secondary,
-    onSecondary = SurfaceLight,
-    secondaryContainer = Secondary.copy(alpha = 0.1f),
-    onSecondaryContainer = Color(0xFF0369A1), // Sky 700
+    onSecondary = Color.White,
+    secondaryContainer = Secondary.copy(alpha = 0.15f),
+    onSecondaryContainer = Accent,
 
     background = BackgroundLight,
     onBackground = TextPrimary,
@@ -30,15 +30,15 @@ private val LightColorScheme = lightColorScheme(
     surface = SurfaceLight,
     onSurface = TextPrimary,
     
-    error = TerribleRed,
-    onError = SurfaceLight,
+    error = Error,
+    onError = Color.White,
     
     outline = OutlineColor,
-    surfaceVariant = BackgroundLight, 
+    surfaceVariant = SurfaceVariant, 
     onSurfaceVariant = TextSecondary
 )
 
-// Fallback Dark (mapped to look decent if forced, but system prefers light now)
+// Fallback Dark (kept for reference, but SvoteTheme now forces light)
 private val DarkColorScheme = darkColorScheme(
     primary = Primary,
     onPrimary = SurfaceLight,
@@ -49,23 +49,20 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun SvoteTheme(
+fun EvoteTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Disable dynamic color to enforce our branding
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = false, // Disable dynamic color to enforce our branding
     content: @Composable () -> Unit
 ) {
-    // Force light theme preference if user asked for "light theme la venum" (all screens)
-    // We will still inspect system setting but prioritize our designed Light Scheme.
-    // For now, let's respect system but make Light Scheme default and polished.
-    val colorScheme = LightColorScheme // Always use Light Scheme as requested by User
+    // Force light theme as per user requirement (ignore system dark mode)
+    val colorScheme = LightColorScheme 
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb() // Make status bar brand color
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false // White text on dark status bar
+            window.statusBarColor = BackgroundLight.toArgb() 
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true 
         }
     }
 

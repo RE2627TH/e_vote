@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.s_vote.ui.theme.*
+import com.example.s_vote.candidateData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,16 +34,16 @@ fun ViewAllFeedbackScreen(navController: NavController, candidateId: String) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
     ) { padding ->
         if (candidate == null) {
             Column(
-                modifier = Modifier.fillMaxSize().background(Color.White)
+                modifier = Modifier.fillMaxSize().background(BackgroundLight)
                     .padding(padding),
 
             verticalArrangement = Arrangement.Center,
@@ -67,21 +70,27 @@ fun ViewAllFeedbackScreen(navController: NavController, candidateId: String) {
                     .padding(16.dp)
             ) {
                 items(candidate.feedback ?: emptyList()) { fb ->
-                    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(fb.userName, fontWeight = FontWeight.Bold)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                        shape = RoundedCornerShape(24.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f))
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(fb.userName, fontWeight = FontWeight.Black, color = TextPrimary)
+                            Spacer(modifier = Modifier.height(4.dp))
                             Row {
                                 (1..5).forEach { star ->
                                     Icon(
                                         painter = painterResource(if (fb.rating >= star) R.drawable.ic_star_filled else R.drawable.ic_star_outline),
                                         contentDescription = null,
-                                        tint = Color(0xFFFFD700),
+                                        tint = Color(0xFFFFB300),
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(fb.comment)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(fb.comment, color = TextSecondary)
                         }
                     }
                 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 import com.example.s_vote.api.ApiClient
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,15 +58,22 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Candidate Dashboard") },
+                title = { 
+                    Text(
+                        "DASHBOARD",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate(Routes.LOGIN) { popUpTo(0) } }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -73,9 +81,9 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF6F6F8))
+                .background(BackgroundLight)
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally // Center content if error/loading
         ) {
 
@@ -191,33 +199,34 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             // Name & Details
                             Column {
                                 Text(
-                                    text = profile?.name ?: "Unknown",
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF111318)
+                                    text = (profile?.name ?: "Unknown").uppercase(),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextPrimary,
+                                    letterSpacing = 1.sp
                                 )
                                 Text(
-                                    text = candidateDesc?.position ?: "Candidate",
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF616F89),
-                                    fontWeight = FontWeight.Medium
+                                    text = (candidateDesc?.position ?: "Candidate").uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary,
+                                    letterSpacing = 2.sp
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 
                                 // Status Badge
                                 val status = candidateDesc?.status ?: "Pending"
                                 val isApproved = status.equals("approved", true)
-                                val badgeColor = if (isApproved) Color(0xFF198754) else Color(0xFFFFA000)
-                                val badgeBg = if (isApproved) Color(0xFFD1E7DD) else Color(0xFFFFF3E0)
+                                val badgeColor = if (isApproved) Success else Warning
+                                val badgeBg = if (isApproved) Success.copy(alpha = 0.1f) else Warning.copy(alpha = 0.1f)
 
                                 Surface(
                                     color = badgeBg,
-                                    shape = RoundedCornerShape(50),
-                                    modifier = Modifier.height(24.dp)
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.padding(top = 8.dp)
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(horizontal = 10.dp)
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Icon(
                                             imageVector = if(isApproved) Icons.Default.CheckCircle else Icons.Default.Warning,
@@ -228,8 +237,8 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = status.uppercase(),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Black,
                                             color = badgeColor
                                         )
                                     }
@@ -242,44 +251,38 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color(0xFF2C097F).copy(alpha = 0.1f),
-                                        Color(0xFF2C097F).copy(alpha = 0.05f)
-                                    )
-                                )
-                            )
-                            .border(1.dp, Color(0xFF2C097F).copy(alpha = 0.2f), RoundedCornerShape(12.dp))
-                            .padding(16.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+                            .padding(24.dp)
                     ) {
                         Row(verticalAlignment = Alignment.Top) {
                             Box(
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF2C097F).copy(alpha = 0.2f)),
+                                    .background(Primary.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Campaign, // Make sure to import Icons.Default.Campaign or similar
+                                    imageVector = Icons.Default.Campaign,
                                     contentDescription = "Campaign",
-                                    tint = Color(0xFF2C097F)
+                                    tint = Primary
                                 )
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(
-                                    "Voting is live today!",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF111318)
+                                    "VOTING IS LIVE",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextPrimary,
+                                    letterSpacing = 1.sp
                                 )
                                 Text(
                                     "Polls are open from 9 AM to 5 PM. Your symbol is now visible to all voters on the ballot.",
-                                    fontSize = 13.sp,
-                                    color = Color(0xFF616F89),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
                                     lineHeight = 18.sp,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -298,10 +301,11 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Campaign Overview",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color(0xFF111318)
+                            "CAMPAIGN OVERVIEW",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            letterSpacing = 1.sp
                         )
                         Surface(
                             color = Color(0xFF2C097F).copy(alpha = 0.1f),
@@ -318,12 +322,11 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                     }
 
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Shadow-sm equivalent
-                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                        shape = RoundedCornerShape(24.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(16.dp))
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
                     ) {
                         Column(
                             modifier = Modifier.padding(20.dp)
@@ -335,25 +338,27 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             ) {
                                 Column {
                                     Text(
-                                        "College Election 2025",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color(0xFF616F89)
+                                        "COLLEGE ELECTION 2025",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextSecondary,
+                                        letterSpacing = 1.sp
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(verticalAlignment = Alignment.Bottom) {
                                         Text(
                                             "${candidateDesc?.voteCount ?: 0}", 
-                                            fontSize = 32.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF111318)
+                                            style = MaterialTheme.typography.headlineLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = TextPrimary
                                         )
-                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            "votes received",
-                                            fontSize = 13.sp,
-                                            color = Color(0xFF616F89),
-                                            modifier = Modifier.padding(bottom = 6.dp)
+                                            "VOTES RECEIVED",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = TextSecondary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(bottom = 8.dp)
                                         )
                                     }
                                 }
@@ -362,9 +367,9 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFF6F6F8))
-                                        .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(12.dp))
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(BackgroundLight)
+                                        .border(1.dp, OutlineColor, RoundedCornerShape(16.dp))
                                         .padding(12.dp)
                                 ) {
                                     val symbolUrl = candidateDesc?.symbolUrl?.let {
@@ -395,22 +400,22 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             val currentVotes = candidateDesc?.voteCount ?: 0
                             val progress = (currentVotes.toFloat() / voteGoal.toFloat()).coerceIn(0f, 1f)
                             
-                            Row(
+                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Vote Share Goal", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF616F89))
-                                Text("${(progress * 100).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2C097F))
+                                Text("VOTE SHARE GOAL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = TextSecondary)
+                                Text("${(progress * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Primary)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             LinearProgressIndicator(
                                 progress = { progress },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(10.dp)
-                                    .clip(RoundedCornerShape(50)),
-                                color = Color(0xFF2C097F),
-                                trackColor = Color(0xFFF0F2F4),
+                                    .height(12.dp)
+                                    .clip(RoundedCornerShape(6.dp)),
+                                color = Primary,
+                                trackColor = BackgroundLight,
                             )
                         }
                     }
@@ -419,10 +424,11 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
 
                     // ---------------- QUICK ACTIONS ----------------
                     Text(
-                        "Quick Actions",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color(0xFF111318),
+                        "QUICK ACTIONS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = TextPrimary,
+                        letterSpacing = 1.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
@@ -453,17 +459,17 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                             QuickActionButton(
                                 icon = Icons.Default.Analytics,
                                 label = "Results",
-                                color = Color(0xFFEA580C), // Orange
-                                bg = Color(0xFFFFF7ED),
+                                color = Success, // Emerald
+                                bg = Success.copy(alpha = 0.1f),
                                 modifier = Modifier.weight(1f),
                                 onClick = { navController.navigate(Routes.RESULT) } // Or Routes.RESULT
                             )
                             // Button 4: Edit Details
                             QuickActionButton(
                                 icon = Icons.Default.Edit,
-                                label = "Edit Details",
-                                color = Color(0xFF16A34A), // Green
-                                bg = Color(0xFFF0FDF4),
+                                label = "Edit",
+                                color = Secondary, // Indigo 400
+                                bg = Secondary.copy(alpha = 0.1f),
                                 modifier = Modifier.weight(1f),
                                 onClick = { navController.navigate("candidate_profile/${candidateId}") }
                             )
@@ -481,13 +487,14 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Recent Feedback",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color(0xFF111318)
+                            "RECENT FEEDBACK",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            letterSpacing = 1.sp
                         )
                         TextButton(onClick = { navController.navigate("candidate_feedback/${candidateId}") }) {
-                            Text("View All", color = Color(0xFF2C097F), fontWeight = FontWeight.SemiBold)
+                            Text("VIEW ALL", color = Secondary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
                         }
                     }
                     
@@ -521,10 +528,9 @@ fun QuickActionButton(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        shadowElevation = 2.dp,
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF3F4F6)),
+        shape = RoundedCornerShape(24.dp),
+        color = SurfaceLight,
+        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineColor),
         modifier = modifier
     ) {
         Column(
@@ -542,10 +548,11 @@ fun QuickActionButton(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = label,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                color = Color(0xFF111318)
+                text = label.uppercase(),
+                fontWeight = FontWeight.Black,
+                style = MaterialTheme.typography.labelSmall,
+                color = TextPrimary,
+                letterSpacing = 1.sp
             )
         }
     }
@@ -554,12 +561,11 @@ fun QuickActionButton(
 @Composable
 fun FeedbackItemCard(item: com.example.s_vote.model.Feedback) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(12.dp))
+            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -585,10 +591,10 @@ fun FeedbackItemCard(item: com.example.s_vote.model.Feedback) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        item.userName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color(0xFF111318)
+                        item.userName.uppercase(),
+                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextPrimary
                     )
                     Row {
                          repeat(item.rating.toInt()) {
@@ -599,8 +605,8 @@ fun FeedbackItemCard(item: com.example.s_vote.model.Feedback) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     item.comment,
-                    fontSize = 13.sp,
-                    color = Color(0xFF616F89),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
                     lineHeight = 18.sp,
                     maxLines = 2
                 )

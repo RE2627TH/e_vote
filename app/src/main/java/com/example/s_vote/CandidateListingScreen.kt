@@ -34,6 +34,7 @@ import com.example.s_vote.navigation.Routes
 import coil.compose.AsyncImage
 import com.example.s_vote.api.ApiClient
 import androidx.compose.ui.layout.ContentScale
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,9 +50,8 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
+            BackgroundLight,
+            SurfaceLight
         )
     )
 
@@ -61,9 +61,9 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                 title = { 
                     Text(
                         roleName.replace("_", " ").uppercase(),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextPrimary,
                         letterSpacing = 2.sp
                     ) 
                 },
@@ -72,20 +72,20 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         },
         bottomBar = {
             BottomNavBar(navController = navController, selectedRoute = Routes.POLL_HISTORY)
         },
-        containerColor = Color.Transparent
+        containerColor = BackgroundLight
     ) { padding ->
 
         Box(
@@ -93,12 +93,12 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                 .fillMaxSize()
                 .background(backgroundGradient)
         ) {
-            // Background Glow
+            // Background Glow - Subtler
             Box(
                 modifier = Modifier
                     .size(250.dp)
                     .offset(y = 100.dp, x = 200.dp)
-                    .background(Color(0xFF2E7D32).copy(alpha = 0.05f), CircleShape)
+                    .background(Primary.copy(alpha = 0.1f), CircleShape)
                     .align(Alignment.BottomEnd)
             )
 
@@ -110,7 +110,7 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
             ) {
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color.White)
+                        CircularProgressIndicator(color = Primary)
                     }
                 } else {
                     val filteredCandidates = candidates.filter {
@@ -126,39 +126,39 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                         contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
                     ) {
                         item {
-                            // Glass Info Banner
-                            Box(
+                            // Premium Light Info Banner
+                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(24.dp))
-                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .background(SurfaceLight)
                                     .border(
                                         1.dp,
-                                        Color.White.copy(alpha = 0.1f),
+                                        OutlineColor,
                                         RoundedCornerShape(24.dp)
                                     )
-                                    .padding(20.dp)
+                                    .padding(24.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_thumb_up),
                                         contentDescription = null,
-                                        tint = Color.White,
+                                        tint = Primary,
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
-                                        Text(
-                                            "MEET YOUR CANDIDATES",
-                                            fontSize = 11.sp,
+                                         Text(
+                                            "CANDIDATE DIRECTORY",
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Black,
-                                            color = Color.White,
+                                            color = TextPrimary,
                                             letterSpacing = 1.sp
                                         )
                                         Text(
                                             "Review profiles and manifestos carefully",
-                                            fontSize = 10.sp,
-                                            color = Color.White.copy(alpha = 0.6f)
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TextSecondary
                                         )
                                     }
                                 }
@@ -169,23 +169,22 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     "AVAILABLE PROFILES",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary,
                                     letterSpacing = 2.sp
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 Box(
                                     modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(Color(0xFF6743FF))
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Primary.copy(alpha = 0.2f))
                                         .padding(horizontal = 8.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         "${filteredCandidates.size}",
-                                        fontSize = 10.sp,
+                                        style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = Color.White
+                                        color = Secondary
                                     )
                                 }
                             }
@@ -214,32 +213,32 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color.White.copy(alpha = 0.08f))
+            .clip(RoundedCornerShape(24.dp))
+            .background(SurfaceLight)
             .border(
                 1.dp,
-                Color.White.copy(alpha = 0.1f),
-                RoundedCornerShape(28.dp)
+                OutlineColor,
+                RoundedCornerShape(24.dp)
             )
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Profile Image with ring and Symbol Overlay
             Box(
                 modifier = Modifier
-                    .size(72.dp)
+                    .size(64.dp)
             ) {
                 // Main Profile Image
                 Box(
                     modifier = Modifier
-                        .size(68.dp)
+                        .size(60.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .border(2.dp, Color(0xFF6743FF), CircleShape)
+                        .background(SurfaceVariant)
+                        .border(1.dp, OutlineColor, CircleShape)
                         .padding(2.dp)
                         .clip(CircleShape)
                 ) {
@@ -257,22 +256,22 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
                 // Symbol Overlay "Ring"
                 Box(
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(24.dp)
                         .align(Alignment.BottomEnd)
                         .clip(CircleShape)
-                        .background(Color(0xFF6743FF))
-                        .border(2.dp, Color(0xFF0F0533), CircleShape)
+                        .background(Primary)
+                        .border(2.dp, Color.White, CircleShape)
                         .padding(4.dp)
                 ) {
                     val symbolUrl = candidate.symbolUrl?.let {
                         if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
                     }
                     AsyncImage(
-                        model = symbolUrl ?: candidate.symbolResId ?: Icons.Default.CheckCircle, // Fallback to a check icon
+                        model = symbolUrl ?: candidate.symbolResId ?: Icons.Default.CheckCircle,
                         contentDescription = "Symbol",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit,
-                        colorFilter = if (candidate.symbolUrl == null && candidate.symbolResId == null) 
+                        colorFilter = if (candidate.symbolUrl == null && candidate.symbolResId == null)
                             ColorFilter.tint(Color.White) else null
                     )
                 }
@@ -280,17 +279,16 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    (candidate.name ?: "UNKNOWN").uppercase(),
-                    fontSize = 15.sp,
+                    (candidate.name ?: "Unknown").uppercase(),
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = TextPrimary,
                     letterSpacing = 1.sp
                 )
                 Text(
-                    (candidate.position ?: "CANDIDATE").uppercase(),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.5f),
+                    (candidate.position ?: "Candidate").uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
                     letterSpacing = 1.sp
                 )
 
@@ -300,15 +298,16 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
                         candidate.badges?.take(2)?.forEach { badge ->
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Primary.copy(alpha = 0.05f))
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
                             ) {
-                                Text(
+                                 Text(
                                     badge.uppercase(),
-                                    fontSize = 8.sp,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 7.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = Color.White.copy(alpha = 0.7f)
+                                    color = Secondary
                                 )
                             }
                         }
@@ -319,8 +318,8 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.3f),
-                modifier = Modifier.size(24.dp)
+                tint = OutlineColor,
+                modifier = Modifier.size(20.dp)
             )
         }
     }

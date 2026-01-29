@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,28 +58,35 @@ fun AdminReportsScreen(navController: NavController) {
     
     // Assign colors
     val chartColors = listOf(
-        Color(0xFF6743FF), Color(0xFF2104A1), Color(0xFFFFC300), 
-        Color(0xFF4A90E2), Color(0xFF9AD3B7), Color(0xFFFF5722),
-        Color(0xFFE91E63), Color(0xFF009688)
+        Primary, Secondary, Success, 
+        Color(0xFF6366F1), Color(0xFF818CF8), Color(0xFFA5B4FC),
+        Color(0xFFC7D2FE), Color(0xFFE0E7FF)
     )
 
     Scaffold(
-        containerColor = Color.White, // ✅ WHITE BACKGROUND
+        containerColor = BackgroundLight, 
         topBar = {
             TopAppBar(
-                title = { Text("REPORT") },
+                title = { 
+                    Text(
+                        "REPORTS",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -87,17 +95,18 @@ fun AdminReportsScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(BackgroundLight)
                 .padding(padding)
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Text(
                 "LIVE VOTING STATUS",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = TextSecondary,
+                letterSpacing = 1.sp
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -105,20 +114,31 @@ fun AdminReportsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             DonutChart(votedPercentage = votedPercentage)
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${(votedPercentage * 100).toInt()}% Voted", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold)
-            Text(text = "$votesCast / $totalStudents students", fontSize = 14.sp, color = Color.Gray)
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = "${(votedPercentage * 100).toInt()}% VOTED", 
+                style = MaterialTheme.typography.headlineMedium, 
+                color = Success, 
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                text = "$votesCast / $totalStudents STUDENTS", 
+                style = MaterialTheme.typography.labelSmall, 
+                color = TextSecondary,
+                letterSpacing = 1.sp
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
             
-            Text("Candidate Performance", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+            Text("CANDIDATE PERFORMANCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = TextSecondary, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
             if (barData.isNotEmpty()) {
-                BarChart(data = barData, labels = barLabels, colors = chartColors)
+                BarChart(data = barData, labels = barLabels, colors = chartColors.map { it.copy(alpha = 0.8f) })
             } else {
-                 Text("No voting data available yet.", color = Color.Gray)
+                 Text("No voting data available yet.", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
             }
         }
     }
@@ -138,21 +158,21 @@ fun DonutChart(votedPercentage: Float, size: Dp = 160.dp) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(size)) {
         Canvas(modifier = Modifier.size(size)) {
             drawArc(
-                color = Color(0xFFE6E6E6),
+                color = SurfaceLight,
                 startAngle = 0f,
                 sweepAngle = 360f,
                 useCenter = false,
                 style = Stroke(width = size.toPx() * 0.14f)
             )
             drawArc(
-                color = Color(0xFF9AD3B7),
+                color = Success,
                 startAngle = -90f,
                 sweepAngle = sweep * 0.5f, // two-colored look (green part)
                 useCenter = false,
                 style = Stroke(width = size.toPx() * 0.14f)
             )
             drawArc(
-                color = Color(0xFF4A90E2),
+                color = Primary,
                 startAngle = -90f + sweep * 0.5f,
                 sweepAngle = sweep * 0.5f,
                 useCenter = false,
@@ -189,10 +209,10 @@ fun BarChart(data: List<Float>, labels: List<String>, colors: List<Color>) {
                 Spacer(modifier = Modifier.height(8.dp))
                 // Label (Candidate Name)
                 Text(
-                    text = labels.getOrElse(idx) { "" },
+                    text = labels.getOrElse(idx) { "" }.uppercase(),
                     fontSize = 10.sp, 
-                    color = Color.Black,
-                    fontWeight = FontWeight.Medium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Black,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
@@ -200,7 +220,7 @@ fun BarChart(data: List<Float>, labels: List<String>, colors: List<Color>) {
                 Text(
                     text = "${value.toInt()}",
                     fontSize = 10.sp,
-                    color = Color.Gray
+                    color = TextSecondary
                 )
             }
         }

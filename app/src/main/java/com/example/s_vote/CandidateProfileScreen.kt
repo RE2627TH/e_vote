@@ -2,6 +2,7 @@ package com.example.s_vote
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.s_vote.model.Candidate
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,20 +33,20 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Manage My Profile", color = Color.Black) },
+            CenterAlignedTopAppBar(
+                title = { Text("Candidate Profile", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.Black
+                            tint = TextPrimary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -52,116 +54,123 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(BackgroundLight)
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp)
         ) {
 
             item {
-                // Profile Header
+                // Profile Header - Card Look
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White)
-                        .padding(20.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                        .padding(24.dp)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(
-                            painter = painterResource(id = candidate.imageResId ?: R.drawable.candidates),
-                            contentDescription = "Profile",
+                        Box(
                             modifier = Modifier
                                 .size(120.dp)
                                 .clip(CircleShape)
-                        )
+                                .background(SurfaceVariant)
+                                .border(2.dp, Primary.copy(alpha = 0.1f), CircleShape)
+                                .padding(4.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = candidate.imageResId ?: R.drawable.candidates),
+                                contentDescription = "Profile",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
                             candidate.name ?: "Unknown Name",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextPrimary
                         )
 
                         Text(
-                            candidate.position ?: "No Position",
-                            fontSize = 14.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.SemiBold
+                            (candidate.position ?: "No Position").uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = TextSecondary,
+                            letterSpacing = 1.sp
                         )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Email removed from model, so we skip or placeholder
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             item {
                 // Personal Details Section
-                Text("Personal Details", fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                    color = Color.Black)
+                Text("PERSONAL DETAILS", style = MaterialTheme.typography.labelSmall, color = TextSecondary, letterSpacing = 2.sp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .padding(16.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
                 ) {
                     Column {
                         DetailRow("Course", candidate.course ?: "N/A")
-                        HorizontalDivider(Modifier.padding(vertical = 12.dp))
+                        HorizontalDivider(Modifier.padding(vertical = 12.dp), color = OutlineColor.copy(alpha = 0.2f))
                         DetailRow("College", candidate.college ?: "N/A")
-                        // Email row removed
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             item {
                 // About Section (Manifesto)
-                Text("About / Manifesto", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text("MANIFESTO", style = MaterialTheme.typography.labelSmall, color = TextSecondary, letterSpacing = 2.sp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .padding(16.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
                 ) {
                     Text(
                         candidate.manifesto ?: "No manifesto available.",
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        lineHeight = 20.sp
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextPrimary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             item {
                 // Badges Section
                 if (!candidate.badges.isNullOrEmpty()) {
-                    Text("Badges", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("BADGES", style = MaterialTheme.typography.labelSmall, color = TextSecondary, letterSpacing = 2.sp)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
-                            .padding(16.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                            .padding(20.dp)
                     ) {
                         Column {
                             candidate.badges.forEachIndexed { index, badge ->
@@ -173,47 +182,49 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
                                 ) {
                                     Text("⭐", modifier = Modifier.padding(end = 12.dp))
                                     Text(
-                                        badge,
-                                        fontSize = 14.sp,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.SemiBold
+                                        badge.uppercase(),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                                 if (index < candidate.badges.size - 1) {
-                                    HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                                    HorizontalDivider(Modifier.padding(vertical = 4.dp), color = OutlineColor.copy(alpha = 0.5f))
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
             item {
                 // Campaign Overview
-                Text("Campaign Overview", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text("CAMPAIGN OVERVIEW", style = MaterialTheme.typography.labelSmall, color = TextSecondary, letterSpacing = 2.sp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .padding(16.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
                 ) {
                     Column {
-                        Text("Leadership Focus", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.Black)
+                        Text("LEADERSHIP FOCUS", style = MaterialTheme.typography.labelSmall, color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                         Text(
                             candidate.tagline ?: "N/A",
-                            fontSize = 13.sp,
-                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                             modifier = Modifier.padding(vertical = 12.dp)
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text("Campaign Goals", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.Black)
+                        Text("CAMPAIGN GOALS", style = MaterialTheme.typography.labelSmall, color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        Spacer(Modifier.height(8.dp))
                         val goalsList = candidate.goals?.split("\n") ?: emptyList()
                         if (goalsList.isNotEmpty()) {
                             goalsList.forEach { goal ->
@@ -222,32 +233,33 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
                                         modifier = Modifier.padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.Top
                                     ) {
-                                        Text("✓", color = Color.Black, fontWeight = FontWeight.Bold)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(goal, fontSize = 13.sp, color = Color.Black)
+                                        Text("✓", color = Primary, fontWeight = FontWeight.Bold)
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Text(goal, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                                     }
                                 }
                             }
                         } else {
-                             Text("No goals listed.", fontSize = 13.sp, color = Color.Gray)
+                             Text("No goals listed.", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             item {
                 // Pledges
-                Text("My Pledges", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text("MY PLEDGES", style = MaterialTheme.typography.labelSmall, color = TextSecondary, letterSpacing = 2.sp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFEDE7FF))
-                        .padding(16.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Primary.copy(alpha = 0.1f))
+                        .border(1.dp, Primary.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
                 ) {
                     Column {
                         val pledgesList = candidate.pledges?.split("\n") ?: emptyList()
@@ -258,18 +270,18 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
                                         modifier = Modifier.padding(vertical = 6.dp),
                                         verticalAlignment = Alignment.Top
                                     ) {
-                                        Text("💜", modifier = Modifier.padding(end = 8.dp))
-                                        Text(pledge, fontSize = 13.sp, color = Color.Black)
+                                        Text("💜", modifier = Modifier.padding(end = 12.dp))
+                                        Text(pledge, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                                     }
                                 }
                             }
                          } else {
-                             Text("No pledges listed.", fontSize = 13.sp, color = Color.Gray)
+                             Text("No pledges listed.", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                          }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(32.dp))
             }
 
             item {
@@ -278,25 +290,27 @@ fun CandidateProfileScreen(navController: NavController, candidateId: String) {
                     onClick = { /* TODO: Edit profile */ },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF6A4BC2))
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    colors = ButtonDefaults.buttonColors(Primary)
                 ) {
-                    Text("Edit Profile", color = Color.White)
+                    Text("EDIT PROFILE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = { /* TODO: Publish changes */ },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF2E7D32))
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    colors = ButtonDefaults.buttonColors(SuccessMild)
                 ) {
-                    Text("Publish Changes", color = Color.White)
+                    Text("PUBLISH CHANGES", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
     }

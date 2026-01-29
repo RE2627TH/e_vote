@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 
 
 @Composable
@@ -74,28 +76,21 @@ fun IdVerifiedScreen(
         }
     }
 
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
-        )
-    )
+    // Background is now BackgroundLight via Scaffold
 
     Scaffold(
-        containerColor = Color.Transparent
+        containerColor = BackgroundLight
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundGradient)
         ) {
             // Background Glows
             Box(
                 modifier = Modifier
                     .size(300.dp)
                     .offset(y = (-100).dp, x = (-100).dp)
-                    .background(Color(0xFFFF3DA6).copy(alpha = 0.1f), CircleShape)
+                    .background(Primary.copy(alpha = 0.08f), CircleShape)
                     .align(Alignment.TopStart)
             )
 
@@ -109,20 +104,20 @@ fun IdVerifiedScreen(
             ) {
                 Spacer(Modifier.height(16.dp))
                 
-                // Glass Logo
+                // Premium Logo
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.2f), RoundedCornerShape(32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_thumb_up),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(40.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
+                        modifier = Modifier.size(50.dp),
+                        colorFilter = ColorFilter.tint(Primary)
                     )
                 }
 
@@ -130,38 +125,38 @@ fun IdVerifiedScreen(
 
                 Text(
                     "ID VERIFICATION",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    letterSpacing = 4.sp
+                    color = TextPrimary,
+                    letterSpacing = 2.sp
                 )
                 
                 Box(
                     modifier = Modifier
-                        .padding(top = 8.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .padding(top = 12.dp)
+                        .clip(CircleShape)
+                        .background(Primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        "Review and Confirm Scanned Data",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        "REVIEW AND CONFIRM SCANNED DATA",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Primary,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Glass Container for Results
+                // Success Status Card
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
-                        .padding(20.dp)
+                        .background(SurfaceLight)
+                        .border(1.dp, SuccessMild.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                        .padding(24.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -171,10 +166,10 @@ fun IdVerifiedScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF4CAF50).copy(alpha = 0.2f)),
+                                .background(SuccessMild.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(24.dp))
+                            Icon(Icons.Default.Check, contentDescription = null, tint = SuccessMild, modifier = Modifier.size(24.dp))
                         }
                         
                         Spacer(modifier = Modifier.width(16.dp))
@@ -182,14 +177,14 @@ fun IdVerifiedScreen(
                         Column {
                             Text(
                                 "SCAN SUCCESSFUL",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color(0xFF4CAF50)
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SuccessMild
                             )
                             Text(
                                 "Auto-extracted ID details",
-                                fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.5f)
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
                             )
                         }
                     }
@@ -231,11 +226,11 @@ fun IdVerifiedScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .clip(RoundedCornerShape(28.dp)),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                     ) {
-                        Text("VERIFY MY IDENTITY", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                        Text("VERIFY MY IDENTITY", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                     }
                 }
 
@@ -274,16 +269,16 @@ fun IdVerifiedScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(Color(0xFF2E7D32).copy(alpha = 0.15f))
-                                .border(1.dp, Color(0xFF2E7D32).copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(SuccessMild.copy(alpha = 0.05f))
+                                .border(1.dp, SuccessMild.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
                                 .padding(20.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(40.dp))
-                                Text("AUTHORIZATION GRANTED", color = Color(0xFF4CAF50), fontWeight = FontWeight.Black, fontSize = 14.sp)
-                                Text("Your ID matches your registered profile.", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                Icon(Icons.Default.Check, contentDescription = null, tint = SuccessMild, modifier = Modifier.size(40.dp))
+                                Text("AUTHORIZATION GRANTED", style = MaterialTheme.typography.titleSmall, color = SuccessMild, fontWeight = FontWeight.Bold)
+                                Text("Your ID matches your registered profile.", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                             }
                         }
                         
@@ -299,12 +294,11 @@ fun IdVerifiedScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp)
-                                .clip(RoundedCornerShape(28.dp)),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                                .height(60.dp),
+                            shape = RoundedCornerShape(30.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SuccessMild)
                         ) {
-                            Text("PROCEED TO VOTE", color = Color.White, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                            Text("PROCEED TO VOTE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
                         }
                     } else {
                         Box(
@@ -341,9 +335,9 @@ fun ModernVerifiedTextField(value: String, onValueChange: (String) -> Unit, labe
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             label, 
-            fontSize = 10.sp, 
-            fontWeight = FontWeight.Black, 
-            color = Color.White.copy(alpha = 0.4f),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = TextSecondary,
             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
         )
         OutlinedTextField(
@@ -353,19 +347,21 @@ fun ModernVerifiedTextField(value: String, onValueChange: (String) -> Unit, labe
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-                focusedBorderColor = Color.White.copy(alpha = 0.4f),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = SurfaceLight,
+                unfocusedContainerColor = SurfaceLight,
+                focusedBorderColor = Primary,
+                unfocusedBorderColor = Primary.copy(alpha = 0.2f),
+                focusedLabelColor = Primary,
+                unfocusedLabelColor = TextSecondary
             )
         )
         if (supportingText != null) {
             Text(
                 supportingText,
-                fontSize = 11.sp,
-                color = Color.White.copy(alpha = 0.3f),
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary.copy(alpha = 0.6f),
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
         }

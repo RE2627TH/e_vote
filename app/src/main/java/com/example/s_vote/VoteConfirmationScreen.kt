@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,28 +98,21 @@ fun VoteConfirmationScreen(
     val isMatched = !currentUserStudentId.isNullOrEmpty() && 
                     studentId.trim().equals(currentUserStudentId?.trim(), ignoreCase = true)
 
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
-        )
-    )
+    // Background is now BackgroundLight via Scaffold
 
     Scaffold(
-        containerColor = Color.Transparent
+        containerColor = BackgroundLight
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundGradient)
         ) {
-            // Background Glows
+            // Subtler Glow
             Box(
                 modifier = Modifier
                     .size(250.dp)
                     .offset(y = 100.dp, x = 100.dp)
-                    .background(Color(0xFF2E7D32).copy(alpha = 0.08f), CircleShape)
+                    .background(Primary.copy(alpha = 0.05f), CircleShape)
                     .align(Alignment.BottomEnd)
             )
 
@@ -132,59 +127,59 @@ fun VoteConfirmationScreen(
 
                 Text(
                     "REVIEW VOTE",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    letterSpacing = 4.sp
+                    color = TextPrimary,
+                    letterSpacing = 2.sp
                 )
                 
                 Box(
                     modifier = Modifier
-                        .padding(top = 8.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .padding(top = 12.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Primary.copy(alpha = 0.05f))
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Text(
                         "Final Step: Confirm Your Choice",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.sp
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Primary,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
                     )
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Candidate Glass Card
+                // Candidate Premium Card
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(32.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
                         .padding(24.dp)
                 ) {
                     Column {
                         Text(
                             "YOUR SELECTION", 
-                            fontSize = 10.sp, 
-                            fontWeight = FontWeight.Black, 
-                            color = Color.White.copy(alpha = 0.4f),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold, 
+                            color = TextSecondary,
                             letterSpacing = 1.sp
                         )
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(12.dp))
                         Text(
                             candidateName.uppercase(), 
-                            fontSize = 22.sp, 
-                            fontWeight = FontWeight.Black, 
-                            color = Color.White
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold, 
+                            color = TextPrimary
                         )
                         Text(
                             position.uppercase(), 
-                            fontSize = 12.sp, 
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold, 
-                            color = Color(0xFF6743FF),
+                            color = Primary,
                             letterSpacing = 1.sp
                         )
                     }
@@ -197,25 +192,27 @@ fun VoteConfirmationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(32.dp))
-                        .background(Color(0xFF2E7D32).copy(alpha = 0.1f))
-                        .border(1.dp, Color(0xFF2E7D32).copy(alpha = 0.2f), RoundedCornerShape(32.dp))
+                        .background(SuccessMild.copy(alpha = 0.05f))
+                        .border(1.dp, SuccessMild.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
                         .padding(24.dp)
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.Default.Check, contentDescription = null, tint = SuccessMild, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(12.dp))
                             Text(
                                 "VOTER IDENTITY VERIFIED", 
-                                fontSize = 10.sp, 
-                                fontWeight = FontWeight.Black, 
-                                color = Color(0xFF4CAF50),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold, 
+                                color = SuccessMild,
                                 letterSpacing = 1.sp
                             )
                         }
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(20.dp))
                         VoterInfoRow("NAME", studentName)
+                        Spacer(Modifier.height(8.dp))
                         VoterInfoRow("DEPT", department)
+                        Spacer(Modifier.height(8.dp))
                         VoterInfoRow("ID", studentId)
                     }
                 }
@@ -231,9 +228,10 @@ fun VoteConfirmationScreen(
                 } else if (isMatched) {
                     Text(
                         "You are authorized for this action.",
-                        color = Color(0xFF4CAF50),
+                        color = SuccessMild,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     
@@ -243,15 +241,14 @@ fun VoteConfirmationScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(60.dp)
-                            .clip(RoundedCornerShape(30.dp)),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                            .height(64.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {
                         if (voteState is com.example.s_vote.viewmodel.VoteState.Loading) {
                              CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                             Text("CAST MY VOTE", fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                             Text("CAST MY VOTE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
                         }
                     }
                 } else {
@@ -259,13 +256,15 @@ fun VoteConfirmationScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Color.Red.copy(alpha = 0.1f))
-                            .padding(20.dp),
+                            .background(androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.1f))
+                            .border(1.dp, androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                            .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("SECURITY MISMATCH", color = Color.Red, fontWeight = FontWeight.Black, fontSize = 16.sp)
-                            Text("Session identity does not match verified ID.", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp, textAlign = TextAlign.Center)
+                            Text("SECURITY MISMATCH", color = androidx.compose.ui.graphics.Color.Red, fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text("Session identity does not match verified ID.", color = TextSecondary, fontSize = 12.sp, textAlign = TextAlign.Center)
                         }
                     }
                 }
@@ -276,8 +275,20 @@ fun VoteConfirmationScreen(
 
 @Composable
 fun VoterInfoRow(label: String, value: String) {
-    Row(modifier = Modifier.padding(bottom = 4.dp)) {
-        Text("$label: ", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.4f))
-        Text(value.uppercase(), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "$label: ", 
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold, 
+            color = TextSecondary,
+            modifier = Modifier.weight(0.3f)
+        )
+        Text(
+            value.uppercase(), 
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold, 
+            color = TextPrimary,
+            modifier = Modifier.weight(0.7f)
+        )
     }
 }
