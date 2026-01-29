@@ -37,10 +37,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
+import com.example.s_vote.ui.theme.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
@@ -107,10 +110,10 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
              setCompressionQuality(90)
              setFreeStyleCropEnabled(true)
              setToolbarTitle("Adjust ID Card")
-             setToolbarColor(Color.Black.toArgb())
-             setStatusBarColor(Color.Black.toArgb())
-             setToolbarWidgetColor(Color.White.toArgb())
-             setActiveControlsWidgetColor(Color(0xFF6743FF).toArgb())
+             setToolbarColor(BackgroundLight.toArgb())
+             setStatusBarColor(BackgroundLight.toArgb())
+             setToolbarWidgetColor(TextPrimary.toArgb())
+             setActiveControlsWidgetColor(Primary.toArgb())
         }
 
         val intent = UCrop.of(sourceUri, destUri)
@@ -162,7 +165,7 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
     }
 
     Scaffold(
-        containerColor = Color.Black
+        containerColor = BackgroundLight
     ) { padding ->
         Box(modifier = Modifier
             .fillMaxSize()
@@ -195,17 +198,18 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.8f)),
+                        .background(BackgroundLight.copy(alpha = 0.9f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = Color(0xFF6743FF))
-                        Spacer(modifier = Modifier.height(16.dp))
+                        CircularProgressIndicator(color = Primary)
+                        Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            "Analyzing ID Card...", 
-                            color = Color.White, 
-                            fontSize = 18.sp, 
-                            fontWeight = FontWeight.Medium
+                            "ANALYZING IDENTITY CARD", 
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            letterSpacing = 2.sp
                         )
                     }
                 }
@@ -217,7 +221,7 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.9f))
+                        .background(BackgroundLight.copy(alpha = 0.95f))
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -226,33 +230,35 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            Icons.Default.Close, 
+                            imageVector = Icons.Default.Close, 
                             contentDescription = null, 
-                            tint = Color.Red, 
-                            modifier = Modifier.size(64.dp)
+                            tint = com.example.s_vote.ui.theme.Error, 
+                            modifier = Modifier.size(80.dp)
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            "Scan Failed",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
+                            "SCANNING FAILED",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            letterSpacing = 1.sp
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             errorMsg,
-                            color = Color.LightGray,
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary,
                             modifier = Modifier.padding(horizontal = 16.dp),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
                         Button(
                             onClick = { viewModel.resetState() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
-                            modifier = Modifier.fillMaxWidth().height(48.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(28.dp)
                         ) {
-                            Text("Try Again", fontSize = 16.sp)
+                            Text("TRY AGAIN", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
                         }
                     }
                 }
@@ -379,31 +385,42 @@ fun PermissionRequestScreen(onRequestPermission: () -> Unit, onCancel: () -> Uni
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F0533)),
+            .background(BackgroundLight),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             Icons.Default.Camera,
             contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(80.dp)
+            tint = TextPrimary,
+            modifier = Modifier.size(100.dp)
         )
         Text(
-            "Camera Access Needed",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
+            "CAMERA ACCESS REQUIRED",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Black,
+            color = TextPrimary,
+            modifier = Modifier.padding(16.dp),
+            letterSpacing = 1.sp
         )
+        Text(
+            "We need camera access to scan your identity card for verification.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
+        )
+        Spacer(Modifier.height(32.dp))
         Button(
             onClick = onRequestPermission,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF))
+            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+            modifier = Modifier.fillMaxWidth(0.7f).height(56.dp),
+            shape = RoundedCornerShape(28.dp)
         ) {
-            Text("Grant Permission")
+            Text("GRANT PERMISSION", fontWeight = FontWeight.Black)
         }
-        TextButton(onClick = onCancel) {
-            Text("Cancel", color = Color.Gray)
+        TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
+            Text("CANCEL", color = TextSecondary, fontWeight = FontWeight.Bold)
         }
     }
 }

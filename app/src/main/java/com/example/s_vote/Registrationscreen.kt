@@ -33,6 +33,7 @@ import com.example.s_vote.R
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.RegisterState
 import com.example.s_vote.viewmodel.RegisterViewModel
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,25 +73,17 @@ fun RegistrationScreen(navController: NavController) {
         }
     }
 
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
-        )
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = backgroundGradient)
+            .background(BackgroundLight)
     ) {
-        // Aesthetic Glows
+        // Background Glow
         Box(
             modifier = Modifier
                 .size(300.dp)
                 .offset(y = (-100).dp, x = (-100).dp)
-                .background(Color(0xFFFF3DA6).copy(alpha = 0.1f), CircleShape)
+                .background(Secondary.copy(alpha = 0.05f), CircleShape)
                 .align(Alignment.TopStart)
         )
 
@@ -107,7 +100,7 @@ fun RegistrationScreen(navController: NavController) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack, 
                     contentDescription = "Back", 
-                    tint = Color.White
+                    tint = TextPrimary
                 )
             }
 
@@ -117,26 +110,20 @@ fun RegistrationScreen(navController: NavController) {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Glass Logo Container
+                // Logo Container
                 Box(
                     modifier = Modifier
                         .size(90.dp)
-                        .clip(RoundedCornerShape(26.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.linearGradient(
-                                listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
-                            ),
-                            shape = RoundedCornerShape(26.dp)
-                        ),
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, OutlineColor, RoundedCornerShape(24.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_thumb_up),
                         contentDescription = "Logo",
                         modifier = Modifier.size(44.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
+                        colorFilter = ColorFilter.tint(Primary)
                     )
                 }
 
@@ -144,17 +131,17 @@ fun RegistrationScreen(navController: NavController) {
                 
                 Text(
                     "JOIN E-VOTE",
-                    fontSize = 32.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = TextPrimary,
                     letterSpacing = 4.sp
                 )
                 
                 Text(
                     "Create your secure account",
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.6f),
-                    letterSpacing = 1.sp
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
 
                 Spacer(Modifier.height(32.dp))
@@ -183,7 +170,7 @@ fun RegistrationScreen(navController: NavController) {
                             Icon(
                                 painter = painterResource(id = android.R.drawable.ic_menu_my_calendar),
                                 contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.5f)
+                                tint = Secondary.copy(alpha = 0.5f)
                             )
                         }
                     )
@@ -210,30 +197,32 @@ fun RegistrationScreen(navController: NavController) {
                         value = selectedRole.uppercase(),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("ROLE", color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                        label = { Text("ROLE") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                            unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-                            focusedBorderColor = Color.White.copy(alpha = 0.4f),
-                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedContainerColor = SurfaceLight.copy(alpha = 0.5f),
+                            unfocusedContainerColor = SurfaceLight.copy(alpha = 0.3f),
+                            focusedBorderColor = Primary,
+                            unfocusedBorderColor = OutlineColor,
+                            focusedLabelColor = Primary,
+                            unfocusedLabelColor = TextSecondary
                         )
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        modifier = Modifier.background(Color(0xFF2104A1))
+                        modifier = Modifier.background(SurfaceLight)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("STUDENT", color = Color.White) },
+                            text = { Text("STUDENT", color = TextPrimary, style = MaterialTheme.typography.labelLarge) },
                             onClick = { selectedRole = "Student"; expanded = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("CANDIDATE", color = Color.White) },
+                            text = { Text("CANDIDATE", color = TextPrimary, style = MaterialTheme.typography.labelLarge) },
                             onClick = { selectedRole = "Candidate"; expanded = false }
                         )
                     }
@@ -252,15 +241,15 @@ fun RegistrationScreen(navController: NavController) {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(28.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                        .height(60.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     if (registerState is RegisterState.Loading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("SIGN UP", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White, letterSpacing = 2.sp)
+                        Text("SIGN UP", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
                 Spacer(Modifier.height(32.dp))
@@ -281,23 +270,26 @@ fun ModernRegTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(label, color = Color.White.copy(alpha = 0.3f), fontSize = 14.sp) },
+        label = { Text(label) },
+        placeholder = { Text(label, color = TextSecondary.copy(alpha = 0.4f)) },
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         singleLine = true,
         trailingIcon = trailingIcon,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            disabledTextColor = Color.White,
-            focusedContainerColor = Color.White.copy(alpha = 0.05f),
-            unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-            disabledContainerColor = Color.White.copy(alpha = 0.02f),
-            focusedBorderColor = Color.White.copy(alpha = 0.4f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
-            disabledBorderColor = Color.White.copy(alpha = 0.1f)
+            focusedTextColor = TextPrimary,
+            unfocusedTextColor = TextPrimary,
+            disabledTextColor = TextSecondary,
+            focusedContainerColor = SurfaceLight.copy(alpha = 0.5f),
+            unfocusedContainerColor = SurfaceLight.copy(alpha = 0.3f),
+            disabledContainerColor = SurfaceVariant,
+            focusedBorderColor = Primary,
+            unfocusedBorderColor = OutlineColor,
+            disabledBorderColor = OutlineColor,
+            focusedLabelColor = Primary,
+            unfocusedLabelColor = TextSecondary
         )
     )
 }

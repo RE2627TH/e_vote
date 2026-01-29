@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object OcrRetrofitInstance {
     // Replace with your Python server IP (must be same network as Android)
-    private const val OCR_BASE_URL = "http://10.57.135.24:5000/"
+    private const val OCR_BASE_URL = "http://10.122.1.24:5000/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

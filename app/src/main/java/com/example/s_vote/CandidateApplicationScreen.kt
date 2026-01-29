@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +70,7 @@ fun CandidateApplicationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(BackgroundLight)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -82,12 +83,23 @@ fun CandidateApplicationScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = TextPrimary)
             }
         }
 
-        Text("Candidate Application", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text("Fill in your details", fontSize = 14.sp, color = Color.Gray)
+        Text(
+            "CANDIDATE APPLICATION", 
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Black,
+            color = TextPrimary,
+            letterSpacing = 2.sp
+        )
+        Text(
+            "Enter your professional details carefully", 
+            style = MaterialTheme.typography.labelSmall,
+            color = TextSecondary,
+            letterSpacing = 1.sp
+        )
 
         Spacer(Modifier.height(20.dp))
 
@@ -99,9 +111,19 @@ fun CandidateApplicationScreen(
                 onValueChange = onChange,
                 label = { Text(label) },
                 modifier = Modifier.fillMaxWidth(0.9f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight,
+                    focusedBorderColor = Secondary,
+                    unfocusedBorderColor = OutlineColor,
+                    focusedLabelColor = Secondary,
+                    unfocusedLabelColor = TextSecondary
+                )
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
         }
 
         field(name, { name = it }, "Full Name")
@@ -127,19 +149,20 @@ fun CandidateApplicationScreen(
                 .clickable { datePickerDialog.show() },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = Color.Black,
-                disabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                disabledTextColor = TextPrimary,
+                disabledContainerColor = SurfaceLight,
+                disabledBorderColor = OutlineColor,
+                disabledLabelColor = TextSecondary,
+                disabledTrailingIconColor = TextSecondary
             ),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(16.dp),
             trailingIcon = {
                 IconButton(onClick = { datePickerDialog.show() }) {
-                    Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date")
+                    Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar), contentDescription = "Select Date", tint = Secondary)
                 }
             }
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
         field(studentId, { studentId = it }, "Student ID")
         field(email, { email = it }, "Email")
         field(phone, { phone = it }, "Phone")
@@ -152,9 +175,19 @@ fun CandidateApplicationScreen(
             label = { Text("Manifesto / Vision") },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .height(120.dp),
-            maxLines = 4,
-            shape = RoundedCornerShape(8.dp)
+                .height(150.dp),
+            maxLines = 6,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = SurfaceLight,
+                unfocusedContainerColor = SurfaceLight,
+                focusedBorderColor = Secondary,
+                unfocusedBorderColor = OutlineColor,
+                focusedLabelColor = Secondary,
+                unfocusedLabelColor = TextSecondary
+            )
         )
 
         Spacer(Modifier.height(24.dp))
@@ -177,10 +210,17 @@ fun CandidateApplicationScreen(
             },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .height(50.dp),
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary),
             enabled = !isLoading
         ) {
-            Text("Submit Application", fontWeight = FontWeight.Bold)
+            Text(
+                "SUBMIT APPLICATION", 
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
         }
 
         if (isLoading) {

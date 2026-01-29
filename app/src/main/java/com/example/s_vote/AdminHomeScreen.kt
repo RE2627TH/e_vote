@@ -43,22 +43,23 @@ import com.example.s_vote.ui.theme.*
 @Composable
 fun FilterButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
 
-    val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface  
+    val containerColor = if (isSelected) Primary else SurfaceLight
+    val contentColor = if (isSelected) Color.White else TextPrimary
 
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = RoundedCornerShape(24.dp),
         color = containerColor,
-        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f)),
         modifier = Modifier
             .clickable { onClick() }
     ) {
         Text(
-            label, 
+            label.uppercase(), 
             color = contentColor, 
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
         )
     }
 }
@@ -107,9 +108,10 @@ fun AdminHomeScreen(navController: NavController) {
             TopAppBar(
                 title = { 
                     Text(
-                        "Manage Candidates", 
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        "MANAGE CANDIDATES", 
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
                     ) 
                 },
                 navigationIcon = {
@@ -117,29 +119,27 @@ fun AdminHomeScreen(navController: NavController) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = TextPrimary
                         )
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        viewModel.fetchPendingCandidates()
-                    }) {
+                    TextButton(onClick = { viewModel.fetchPendingCandidates() }) {
                         Text(
-                            if (isLoading) "..." else "Sync", 
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelLarge
+                            if (isLoading) "SYNCING..." else "SYNC LIST", 
+                            color = Primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = BackgroundLight
     ) { padding ->
         Column(
             modifier = Modifier
@@ -150,10 +150,11 @@ fun AdminHomeScreen(navController: NavController) {
 
             // Header
             Text(
-                "Pending Approvals", 
-                style = MaterialTheme.typography.headlineSmall,
+                "PENDING VERIFICATION", 
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = TextSecondary,
+                letterSpacing = 1.sp
             )
 
             Spacer(Modifier.height(16.dp))
@@ -162,13 +163,21 @@ fun AdminHomeScreen(navController: NavController) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Search by name or role") },
+                placeholder = { Text("Search candidates...", color = TextSecondary.copy(alpha=0.5f)) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
+                shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 leadingIcon = {
-                   Icon(painter = painterResource(android.R.drawable.ic_menu_search), contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) 
-                }
+                   Icon(painter = painterResource(android.R.drawable.ic_menu_search), contentDescription = "Search", tint = Primary) 
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight,
+                    focusedBorderColor = Primary,
+                    unfocusedBorderColor = Primary.copy(alpha = 0.1f)
+                )
             )
 
             Spacer(Modifier.height(16.dp))
@@ -196,13 +205,14 @@ fun AdminHomeScreen(navController: NavController) {
                     items(filteredList, key = { it.id ?: kotlin.random.Random.nextInt().toString() }) { candidate ->
                         
                         // User Card
-                        ElevatedCard(
+                        Card(
                             onClick = { showDetailFor = candidate },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = SurfaceLight
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f))
                         ) {
                             Row(
                                 modifier = Modifier
@@ -213,14 +223,16 @@ fun AdminHomeScreen(navController: NavController) {
                                 // Avatar Placeholder
                                 Surface(
                                     shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    modifier = Modifier.size(48.dp)
+                                    color = BackgroundLight,
+                                    modifier = Modifier.size(56.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, OutlineColor)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
-                                            candidate.name?.take(1) ?: "?", 
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            (candidate.name ?: "?").take(1).uppercase(), 
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = Primary
                                         )
                                     }
                                 }
@@ -229,28 +241,32 @@ fun AdminHomeScreen(navController: NavController) {
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        candidate.name ?: "Unknown", 
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        (candidate.name ?: "Unknown").uppercase(), 
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextPrimary,
+                                        letterSpacing = 1.sp
                                     )
                                     Text(
-                                        candidate.position ?: "No Position", 
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        (candidate.position ?: "No Position").uppercase(), 
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondary,
+                                        letterSpacing = 1.sp
                                     )
                                     
-                                    Spacer(Modifier.height(4.dp))
+                                    Spacer(Modifier.height(8.dp))
                                     
                                     Surface(
-                                        shape = MaterialTheme.shapes.small,
-                                        color = if(candidate.status == "approved") SoftGreen.copy(alpha=0.1f) else MaterialTheme.colorScheme.primaryContainer
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = if(candidate.status == "approved") Success.copy(alpha=0.1f) else Warning.copy(alpha=0.1f)
                                     ) {
                                         Text(
-                                            candidate.status ?: "Pending", 
+                                            (candidate.status ?: "Pending").uppercase(), 
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = if(candidate.status == "approved") SoftGreen else MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            color = if(candidate.status == "approved") Success else Warning,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                            fontWeight = FontWeight.Black,
+                                            letterSpacing = 1.sp
                                         )
                                     }
                                 }
@@ -285,30 +301,41 @@ fun AdminHomeScreen(navController: NavController) {
     showDetailFor?.let { cand ->
         AlertDialog(
             onDismissRequest = { showDetailFor = null },
-            icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }, // Placeholder icon
-            title = { Text(cand.name ?: "Candidate Details") },
+            containerColor = SurfaceLight,
+            title = { 
+                Text(
+                    (cand.name ?: "Candidate Details").uppercase(), 
+                    style = MaterialTheme.typography.titleLarge, 
+                    color = TextPrimary, 
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                ) 
+            },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Applied for: ${cand.position ?: "N/A"}")
-                    Text("Role: ${cand.role ?: "N/A"}")
-                    Text("Manifesto:", fontWeight = FontWeight.Bold)
-                    Text(cand.manifesto ?: "No manifesto provided.", style = MaterialTheme.typography.bodyMedium)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DetailRow("Position", cand.position ?: "N/A")
+                    DetailRow("Role", cand.role ?: "N/A")
+                    Text("Manifesto:", style = MaterialTheme.typography.labelMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Text(cand.manifesto ?: "No manifesto provided.", style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
                     
                     Spacer(Modifier.height(8.dp))
-                    Text("Status: ${cand.status ?: "N/A"}", color = MaterialTheme.colorScheme.primary)
+                    Text("Current Status: ${(cand.status ?: "Pending").uppercase()}", color = Secondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
                 }
             },
             confirmButton = {
-                Button(onClick = { viewModel.approveCandidate(cand.id ?: ""); showDetailFor = null }) {
-                    Text("Approve Application")
+                Button(
+                    onClick = { viewModel.approveCandidate(cand.id ?: ""); showDetailFor = null },
+                    colors = ButtonDefaults.buttonColors(containerColor = Success),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("APPROVE", fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
-                OutlinedButton(
-                    onClick = { viewModel.rejectCandidate(cand.id ?: ""); showDetailFor = null },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                TextButton(
+                    onClick = { viewModel.rejectCandidate(cand.id ?: ""); showDetailFor = null }
                 ) {
-                    Text("Reject")
+                    Text("REJECT", color = Error, fontWeight = FontWeight.Black)
                 }
             }
         )
@@ -364,6 +391,15 @@ fun AddCandidateDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
         TextButton(onClick = onDismiss) { Text("Cancel") }
     })
 }
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text("$label: ", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = TextPrimary, modifier = Modifier.width(80.dp))
+        Text(value, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
+    }
+}
+
 
 
 

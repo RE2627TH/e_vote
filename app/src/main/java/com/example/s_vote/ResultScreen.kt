@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.ui.text.style.TextAlign
+import com.example.s_vote.ui.theme.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,7 +30,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -75,15 +76,22 @@ fun ResultScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Approve Results") }, // Just title
+                title = { 
+                    Text(
+                        "ELECTION RESULTS",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF18048A),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -92,31 +100,34 @@ fun ResultScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color.White)
-                .padding(12.dp)
+                .background(BackgroundLight)
+                .padding(16.dp)
         ) {
             if (showResults) {
                 Text(
                     "FINAL RESULTS",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    color = TextPrimary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    letterSpacing = 4.sp
                 )
 
                 // ---------- HEADER ----------
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFEDE7FF), RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(SurfaceLight)
                         .padding(12.dp)
                 ) {
-                    Text("Position", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.2f))
-                    Text("Candidate", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.8f))
-                    Text("Votes", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-                    Text("Result", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                    Text("Position", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1.2f), style = MaterialTheme.typography.labelSmall)
+                    Text("Candidate", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1.8f), style = MaterialTheme.typography.labelSmall)
+                    Text("Votes", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
+                    Text("Result", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -139,14 +150,15 @@ fun ResultScreen(navController: NavController) {
                     )
                     Text(
                         "Results Not Yet Published",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        color = TextPrimary,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
                         "Please wait for the admin to approve and publish the results.",
-                        fontSize = 14.sp,
-                        color = Color.Black.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -170,11 +182,11 @@ fun AnimatedResultRow(result: UserElectionResult) {
     // WINNER highlight
     val isWinner = result.percentage > 50
 
-    // Gold Gradient for Winner
+    // Winner Highlighting
     val winnerBrush = Brush.horizontalGradient(
         colors = listOf(
-            Color(0xFFFFD700),   // Gold
-            Color(0xFFFFE680)    // Light Gold
+            Success.copy(alpha = 0.15f),
+            Primary.copy(alpha = 0.1f)
         )
     )
 
@@ -194,16 +206,15 @@ fun AnimatedResultRow(result: UserElectionResult) {
         animationSpec = tween(1000)
     )
 
-    // Background: Gold for winner, soft lavender for others
+    // Background: Surfaced slate for everyone, extra glow for winning
     val bgModifier = if (isWinner) {
         Modifier
-            .background(winnerBrush, RoundedCornerShape(16.dp))
-            .border(2.dp, Color(0xFFFFC300), RoundedCornerShape(16.dp))
-            .shadow(12.dp, RoundedCornerShape(16.dp)) // GLow effect
+            .background(winnerBrush, RoundedCornerShape(24.dp))
+            .border(1.dp, Success, RoundedCornerShape(24.dp))
     } else {
         Modifier
-            .background(Color(0xFFF8F6FF), RoundedCornerShape(16.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
+            .background(SurfaceLight, RoundedCornerShape(24.dp))
+            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
     }
 
     Column(
@@ -233,26 +244,29 @@ fun AnimatedResultRow(result: UserElectionResult) {
             Column(Modifier.weight(1.8f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = result.position,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        text = result.position.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = if (isWinner) Success else Primary,
+                        letterSpacing = 1.sp
                     )
 
                     if (isWinner) {
                         Spacer(Modifier.width(6.dp))
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_crown), // Add crown icon
+                            painter = painterResource(id = R.drawable.ic_crown), 
                             contentDescription = "Winner",
-                            tint = Color(0xFFEFB700),
+                            tint = Secondary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
                 }
 
                 Text(
-                    result.candidate,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isWinner) Color(0xFF7A5200) else Color(0xFF5A3AE8)
+                    result.candidate.uppercase(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Black,
+                    color = TextPrimary
                 )
             }
 
@@ -261,8 +275,9 @@ fun AnimatedResultRow(result: UserElectionResult) {
                 "$animatedVotes",
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (isWinner) Color(0xFF6F4F00) else Color.Black
+                color = TextPrimary
             )
 
             // Percentage
@@ -270,8 +285,9 @@ fun AnimatedResultRow(result: UserElectionResult) {
                 "%.1f%%".format(animatedPercent),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                color = if (isWinner) Color(0xFF2E7D32) else Color.Red
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Black,
+                color = if (isWinner) Success else Primary
             )
         }
 
@@ -279,13 +295,13 @@ fun AnimatedResultRow(result: UserElectionResult) {
 
         // Progress Bar
         LinearProgressIndicator(
-            progress = animatedPercent / 100f,
+            progress = { animatedPercent / 100f },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(6.dp)),
-            trackColor = Color(0xFFE0E0E0),
-            color = if (isWinner) Color(0xFF8C6E00) else Color.Red
+            trackColor = BackgroundLight,
+            color = if (isWinner) Success else Primary
         )
     }
 }

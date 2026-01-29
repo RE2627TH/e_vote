@@ -1,5 +1,7 @@
 package com.example.s_vote
 
+import androidx.compose.foundation.border
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.model.Candidate
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,9 +61,9 @@ fun PollHistoryScreen(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -69,7 +72,7 @@ fun PollHistoryScreen(navController: NavController) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(Color(0xFFF6F6F8))
+                .background(BackgroundLight)
         ) {
 
             when (val state = historyState) {
@@ -80,7 +83,7 @@ fun PollHistoryScreen(navController: NavController) {
                 }
                 is com.example.s_vote.viewmodel.VoteHistoryState.Error -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(state.message, color = Color.Gray)
+                        Text(state.message, color = TextSecondary)
                     }
                 }
                 is com.example.s_vote.viewmodel.VoteHistoryState.Success -> {
@@ -89,9 +92,9 @@ fun PollHistoryScreen(navController: NavController) {
                     if (historyItems.isEmpty()) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("No votes cast yet", fontWeight = FontWeight.Bold, color = Color.Gray)
+                                Text("No votes cast yet", fontWeight = FontWeight.Black, color = TextPrimary)
                                 Spacer(Modifier.height(8.dp))
-                                Text("Your voting records will appear here.", fontSize = 12.sp, color = Color.Gray)
+                                Text("Your voting records will appear here.", fontSize = 12.sp, color = TextSecondary)
                             }
                         }
                     } else {
@@ -106,9 +109,9 @@ fun PollHistoryScreen(navController: NavController) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(Color(0xFFEDE7FF))
-                                        .padding(16.dp),
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(Primary.copy(alpha = 0.1f))
+                                        .padding(20.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
                                     Row(
@@ -119,14 +122,15 @@ fun PollHistoryScreen(navController: NavController) {
                                         Column {
                                             Text(
                                                 "Your voting records",
-                                                fontWeight = FontWeight.SemiBold,
+                                                fontWeight = FontWeight.Black,
                                                 fontSize = 14.sp,
-                                                color = Color.Black
+                                                color = TextPrimary,
+                                                letterSpacing = 1.sp
                                             )
                                             Text(
                                                 "Summary of your participation",
                                                 fontSize = 12.sp,
-                                                color = Color.Black.copy(alpha = 0.7f)
+                                                color = TextSecondary
                                             )
                                         }
                                     }
@@ -161,9 +165,9 @@ private fun PollHistoryCard(item: com.example.s_vote.model.VoteHistoryItem, onCl
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .background(SurfaceLight)
+            .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -186,8 +190,8 @@ private fun PollHistoryCard(item: com.example.s_vote.model.VoteHistoryItem, onCl
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF1EEFF)),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -202,18 +206,20 @@ private fun PollHistoryCard(item: com.example.s_vote.model.VoteHistoryItem, onCl
             // Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    item.candidateName,
+                    item.candidateName.uppercase(),
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2104A1)
+                    fontWeight = FontWeight.Black,
+                    color = TextPrimary,
+                    letterSpacing = 1.sp
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    item.position,
-                    fontSize = 13.sp,
-                    color = Color.Gray
+                    item.position.uppercase(),
+                    fontSize = 12.sp,
+                    color = Primary,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -221,7 +227,7 @@ private fun PollHistoryCard(item: com.example.s_vote.model.VoteHistoryItem, onCl
                 Text(
                     item.electionTitle,
                     fontSize = 11.sp,
-                    color = Color(0xFF6743FF),
+                    color = TextSecondary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -230,8 +236,9 @@ private fun PollHistoryCard(item: com.example.s_vote.model.VoteHistoryItem, onCl
                 Text(
                     "VOTED",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF2E7D32)
+                    fontWeight = FontWeight.Black,
+                    color = SuccessMild,
+                    letterSpacing = 1.sp
                 )
                 
                 val date = item.timestamp.split(" ")[0]

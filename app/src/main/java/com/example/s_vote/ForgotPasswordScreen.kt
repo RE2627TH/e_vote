@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.s_vote.ui.theme.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -48,9 +50,8 @@ fun ForgotPasswordScreen(navController: NavController) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
+            BackgroundLight,
+            SurfaceLight
         )
     )
 
@@ -60,20 +61,20 @@ fun ForgotPasswordScreen(navController: NavController) {
                 title = { 
                     Text(
                         "RESET ACCESS",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         },
@@ -89,7 +90,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                 modifier = Modifier
                     .size(300.dp)
                     .offset(y = (-100).dp, x = 200.dp)
-                    .background(Color(0xFFFF3DA6).copy(alpha = 0.08f), androidx.compose.foundation.shape.CircleShape)
+                    .background(Primary.copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape)
                     .align(Alignment.TopEnd)
             )
 
@@ -103,18 +104,16 @@ fun ForgotPasswordScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    "Welcome back!".uppercase(),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    letterSpacing = 2.sp
+                    "Account Recovery",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Black
                 )
                 Text(
                     "Authorize Identity to Reset Password",
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))
@@ -141,16 +140,16 @@ fun ForgotPasswordScreen(navController: NavController) {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(28.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
+                        .height(60.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     enabled = resetState !is com.example.s_vote.viewmodel.ResetState.Loading,
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     if (resetState is com.example.s_vote.viewmodel.ResetState.Loading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("SUBMIT REQUEST", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                        Text("SUBMIT REQUEST", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -163,10 +162,9 @@ fun ModernForgotField(label: String, value: String, onValueChange: (String) -> U
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Text(
             label, 
-            fontSize = 10.sp, 
-            fontWeight = FontWeight.Black, 
-            color = Color.White.copy(alpha = 0.4f),
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            style = MaterialTheme.typography.labelSmall,
+            color = TextSecondary,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
         OutlinedTextField(
             value = value,
@@ -176,12 +174,14 @@ fun ModernForgotField(label: String, value: String, onValueChange: (String) -> U
             singleLine = true,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-                focusedBorderColor = Color.White.copy(alpha = 0.4f),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = SurfaceLight.copy(alpha = 0.5f),
+                unfocusedContainerColor = SurfaceLight.copy(alpha = 0.3f),
+                focusedBorderColor = Primary,
+                unfocusedBorderColor = OutlineColor,
+                focusedLabelColor = Primary,
+                unfocusedLabelColor = TextSecondary
             )
         )
     }

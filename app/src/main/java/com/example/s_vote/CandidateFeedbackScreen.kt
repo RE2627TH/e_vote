@@ -26,6 +26,7 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.s_vote.viewmodel.CandidateViewModel
 import com.example.s_vote.model.Candidate
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,8 +67,9 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2D0981),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -75,7 +77,7 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF6F6F8))
+                .background(BackgroundLight)
                 .padding(paddingValues)
         ) {
             // Stats Section
@@ -89,9 +91,10 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                 Card(
                     modifier = Modifier.weight(1f),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = SurfaceLight
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f))
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -130,9 +133,10 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                 Card(
                     modifier = Modifier.weight(1f),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF2D0981)
+                        containerColor = Primary.copy(alpha = 0.1f)
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.2f))
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -162,7 +166,8 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                         Text(
                             text = "Based on ${feedbackList.size} reviews",
                             fontSize = 10.sp,
-                            color = Color(0xFFD8B4FE)
+                            color = Primary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -184,8 +189,10 @@ fun CandidateFeedbackScreen(navController: NavController, candidateId: String) {
                         onClick = { selectedFilter = filter },
                         label = { Text(filter) },
                         colors = FilterChipDefaults.filterChipColors(
-                            containerColor = if (selectedFilter == filter) Color(0xFF2D0981) else Color.White,
-                            labelColor = if (selectedFilter == filter) Color.White else Color(0xFF475569)
+                            containerColor = SurfaceLight,
+                            labelColor = TextPrimary,
+                            selectedContainerColor = Primary,
+                            selectedLabelColor = Color.White
                         ),
                         modifier = Modifier.height(36.dp)
                     )
@@ -215,9 +222,10 @@ fun FeedbackCard(feedback: FeedbackItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = SurfaceLight
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -230,7 +238,7 @@ fun FeedbackCard(feedback: FeedbackItem) {
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFF1F5F9)),
+                            .background(Primary.copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

@@ -13,7 +13,7 @@
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:enableOnBackInvokedCallback="true"
-        android:theme="@style/Theme.Svote"
+        android:theme="@style/Theme.Evote"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher">
         <activity

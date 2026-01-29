@@ -1,20 +1,19 @@
 package com.example.s_vote
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,92 +21,105 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 
 @Composable
 fun ApplicationSubmittedScreen(navController: NavController, applicationId: String) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF8F9FA)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+// Background is now handled by the Scaffold containerColor
+
+    Scaffold(
+        containerColor = BackgroundLight
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .clip(RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(32.dp)),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = SurfaceLight
             ),
-            elevation = CardDefaults.cardElevation(8.dp)
+            border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f))
         ) {
             Column(
                 modifier = Modifier
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Success",
-                    tint = Color(0xFF2E7D32),
+                Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(Color(0xFFE8F5E9))
-                        .padding(20.dp)
-                )
+                        .clip(CircleShape)
+                        .background(SuccessMild.copy(alpha = 0.1f))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Success",
+                        tint = SuccessMild,
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
 
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    "Application Submitted!",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2E7D32)
+                    "APPLICATION SUBMITTED",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    color = TextPrimary,
+                    letterSpacing = 1.sp
                 )
 
                 Spacer(Modifier.height(12.dp))
 
                 Text(
                     "Your application to become a candidate has been successfully submitted.",
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    color = Color.Gray
+                    color = TextSecondary
                 )
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
 
                 // Application ID Section
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFF3F4F6))
-                        .padding(12.dp),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Primary.copy(alpha = 0.1f))
+                        .padding(20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Application ID:", fontWeight = FontWeight.SemiBold)
-                    Text(applicationId, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
+                    Text("APPLICATION ID", style = MaterialTheme.typography.labelSmall, color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(applicationId, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = TextPrimary)
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Text(
-                    "Your application is now pending review by the admin.",
+                    "Your application is now pending review by the admin unit.",
+                    style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
-                    color = Color.Gray
+                    color = TextSecondary
                 )
             }
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(48.dp))
 
         // Action buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            horizontalArrangement = Arrangement.SpaceAround
+        Column(
+            modifier = Modifier.fillMaxWidth(0.9f)
         ) {
             // View Status Button
             Button(
@@ -115,33 +127,30 @@ fun ApplicationSubmittedScreen(navController: NavController, applicationId: Stri
                     navController.navigate(Routes.applicationStatus(applicationId))
                 },
                 modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6200EE)
+                    containerColor = Primary
                 )
             ) {
-                Text("View Status", color = Color.White)
+                Text("VIEW STATUS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             // Go Home Button
-            Button(
+            TextButton(
                 onClick = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF03A9F4)
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Go to Login", color = Color.White)
+                Text("BACK TO LOGIN", color = TextSecondary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
     }
+}
 }

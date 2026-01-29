@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
+import com.example.s_vote.ui.theme.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,9 +57,9 @@ fun SplashScreen(navController: NavController) {
     // Modern Vibrant Gradient (Indigo -> Royal Blue -> Violet)
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            androidx.compose.ui.graphics.Color(0xFF0F0533),
-            androidx.compose.ui.graphics.Color(0xFF2104A1),
-            androidx.compose.ui.graphics.Color(0xFF6743FF)
+            Color(0xFF0F0533), // Deep Navy
+            Primary,
+            Secondary
         )
     )
 
@@ -113,7 +114,7 @@ fun SplashScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .background(androidx.compose.ui.graphics.Color(0xFF6743FF).copy(alpha = 0.3f), CircleShape)
+                        .background(Secondary.copy(alpha = 0.3f), CircleShape)
                 )
                 
                 Image(
@@ -122,6 +123,7 @@ fun SplashScreen(navController: NavController) {
                     modifier = Modifier.size(60.dp),
                     contentScale = ContentScale.Fit
                 )
+                CircularProgressIndicator(color = Secondary)
             }
 
             Spacer(modifier = Modifier.height(32.dp))

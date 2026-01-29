@@ -3,8 +3,10 @@ package com.example.s_vote
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape // Added import for CircleShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -12,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import com.example.s_vote.ui.theme.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
@@ -117,8 +121,9 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF18048A),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -126,14 +131,20 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(BackgroundLight)
                 .padding(padding)
-                .padding(16.dp)
+                .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             // Photo Upload Section
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Button(onClick = { photoLauncher.launch("image/*") }) {
-                    Text("Upload Photo")
+                Button(
+                    onClick = { photoLauncher.launch("image/*") },
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary.copy(alpha = 0.1f))
+                ) {
+                    Text("UPLOAD PHOTO", color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 if (photoPath != null) {
@@ -142,9 +153,10 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
                         model = url,
                         contentDescription = "Photo Preview",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .border(1.dp, Color.Gray, androidx.compose.foundation.shape.CircleShape),
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceLight)
+                            .border(1.dp, Primary.copy(alpha = 0.1f), CircleShape),
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop
                     )
                 }
@@ -153,8 +165,13 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
             
             // Symbol Upload Section
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Button(onClick = { symbolLauncher.launch("image/*") }) {
-                    Text("Upload Symbol")
+                Button(
+                    onClick = { symbolLauncher.launch("image/*") },
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary.copy(alpha = 0.1f))
+                ) {
+                    Text("UPLOAD SYMBOL", color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 if (symbolPath != null) {
@@ -162,7 +179,11 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
                      coil.compose.AsyncImage(
                         model = url,
                         contentDescription = "Symbol Preview",
-                        modifier = Modifier.size(60.dp),
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit
                     )
                 }
@@ -170,17 +191,17 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(value = course, onValueChange = { course = it }, label = { Text("Course (e.g. B.Tech IT)") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = course, onValueChange = { course = it }, label = { Text("Course (e.g. B.Tech IT)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(value = college, onValueChange = { college = it }, label = { Text("College Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = college, onValueChange = { college = it }, label = { Text("College Name") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(value = tagline, onValueChange = { tagline = it }, label = { Text("Campaign Tagline") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = tagline, onValueChange = { tagline = it }, label = { Text("Campaign Tagline") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(value = goals, onValueChange = { goals = it }, label = { Text("Campaign Goals") }, modifier = Modifier.fillMaxWidth().height(120.dp), singleLine = false)
+            OutlinedTextField(value = goals, onValueChange = { goals = it }, label = { Text("Campaign Goals") }, modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(16.dp), singleLine = false)
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(value = pledges, onValueChange = { pledges = it }, label = { Text("My Pledges") }, modifier = Modifier.fillMaxWidth().height(120.dp), singleLine = false)
+            OutlinedTextField(value = pledges, onValueChange = { pledges = it }, label = { Text("My Pledges") }, modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(16.dp), singleLine = false)
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
@@ -189,9 +210,11 @@ fun ManageCandidateProfileScreen(navController: NavController, candidateId: Stri
                     // Optionally show toast or navigate back
                     navController.popBackStack()
                 },
-                modifier = Modifier.fillMaxWidth().height(50.dp)
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(30.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Primary)
             ) {
-                Text("Save Changes")
+                Text("SAVE PROFILE CHANGES", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
         }
     }

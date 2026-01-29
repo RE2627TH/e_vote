@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.CandidateViewModel
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,16 +42,16 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Candidate Details") },
+            CenterAlignedTopAppBar(
+                title = { Text("Candidate Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -73,23 +74,23 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .background(Color(0xFFF6F6F8))
+                        .background(BackgroundLight)
                         .verticalScroll(rememberScrollState())
-                        .padding(bottom = 80.dp) // Space for button
+                        .padding(bottom = 120.dp)
                 ) {
                     // --- HEADER ---
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
+                            .height(220.dp)
                     ) {
-                        // Gradient Background
+                        // Soft Deep Gradient Background
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
                                     Brush.verticalGradient(
-                                        colors = listOf(Color(0xFF2104A1), Color(0xFF6743FF))
+                                        colors = listOf(Primary.copy(alpha = 0.15f), BackgroundLight)
                                     )
                                 )
                         )
@@ -108,20 +109,24 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(CircleShape)
-                                    .border(4.dp, Color.White, CircleShape),
+                                    .background(BackgroundLight)
+                                    .border(2.dp, Primary, CircleShape)
+                                    .padding(4.dp)
+                                    .clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(12.dp))
                             Text(
-                                user.name,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                user.name.uppercase(),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextPrimary
                             )
                             Text(
-                                details?.position ?: "Candidate",
-                                fontSize = 16.sp,
-                                color = Color.White.copy(alpha = 0.8f)
+                                (details?.position ?: "Candidate").uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = TextSecondary,
+                                letterSpacing = 1.sp
                             )
                         }
                     }
@@ -134,7 +139,7 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                              Text(
                                 details?.manifesto ?: "No manifesto provided.",
                                 lineHeight = 20.sp,
-                                color = Color(0xFF333333)
+                                color = TextPrimary
                             )
                         }
 
@@ -145,7 +150,7 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                              Text(
                                 details?.goals ?: "No specific goals listed.",
                                 lineHeight = 20.sp,
-                                color = Color(0xFF333333)
+                                color = TextPrimary
                             )
                         }
 
@@ -157,7 +162,7 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                                 details?.pledges ?: "I pledge to serve with integrity.",
                                 lineHeight = 20.sp,
                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                color = Color(0xFF333333)
+                                color = TextPrimary
                             )
                         }
                         
@@ -185,8 +190,8 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                         var showFeedbackDialog by remember { mutableStateOf(false) }
 
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F7FF)),
-                            elevation = CardDefaults.cardElevation(2.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
@@ -195,9 +200,9 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Feedback & Ratings", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF2104A1))
+                                    Text("Feedback & Ratings", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Primary)
                                     TextButton(onClick = { showFeedbackDialog = true }) {
-                                        Text("Rate Candidate", color = Color(0xFF6743FF), fontWeight = FontWeight.Bold)
+                                        Text("Rate Candidate", color = Secondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
                                 
@@ -208,19 +213,19 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                                     Text("No reviews yet. Be the first to review!", fontSize = 14.sp, color = Color.Gray)
                                 } else {
                                     val averageRating = feedbackList.map { it.rating }.average()
-                                    Text("Average Rating: ${String.format("%.1f", averageRating)} ⭐", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFFFFB300))
+                                    Text("Average Rating: ${String.format("%.1f", averageRating)} ⭐", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Color(0xFFFFB300))
                                     Spacer(modifier = Modifier.height(12.dp))
                                     
-                                    feedbackList.take(5).forEach { feedback ->
+                                     feedbackList.take(5).forEach { feedback ->
                                         Column(modifier = Modifier.fillMaxWidth()) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(feedback.userName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                                Text(feedback.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text("${feedback.rating} ⭐", fontSize = 12.sp, color = Color(0xFFFFB300))
                                             }
-                                            Text(feedback.comment, fontSize = 14.sp, color = Color(0xFF444444))
+                                            Text(feedback.comment, fontSize = 14.sp, color = TextSecondary)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
+                                            HorizontalDivider(color = Primary.copy(alpha = 0.1f))
                                             Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
@@ -279,7 +284,7 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                                                 }
                                             }
                                         },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2104A1))
+                                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
                                     ) {
                                         Text("Submit")
                                     }
@@ -298,20 +303,19 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
                 Button(
                     onClick = {
                         val pos = details?.position ?: ""
-                        // Basic URL encoding for position
                         val encodedPos = java.net.URLEncoder.encode(pos, "UTF-8")
                         navController.navigate("scan_id/$candidateId?position=$encodedPos")
                     },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(16.dp)
+                        .padding(horizontal = 24.dp, vertical = 24.dp)
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .shadow(8.dp, RoundedCornerShape(12.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    shape = RoundedCornerShape(12.dp)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SuccessMild),
+                    shape = RoundedCornerShape(28.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
-                    Text("VOTE FOR ${user.name.uppercase()}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("VOTE FOR ${user.name.uppercase()}", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
                 }
             }
         }
@@ -321,13 +325,14 @@ fun CandidateProfileViewScreen(navController: NavController, candidateId: String
 @Composable
 fun CardSection(title: String, content: @Composable () -> Unit) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Primary.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF2104A1))
-             Spacer(Modifier.height(8.dp))
+        Column(Modifier.padding(20.dp)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = TextPrimary)
+             Spacer(Modifier.height(12.dp))
              content()
         }
     }

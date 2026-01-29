@@ -15,6 +15,9 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.widget.Toast
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.sp
+import com.example.s_vote.ui.theme.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,8 +54,9 @@ fun CreateElectionScreen(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2104A1),
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                     )
             )
         }
@@ -60,37 +64,61 @@ fun CreateElectionScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(BackgroundLight)
                 .padding(padding)
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
-            Text("Create election", fontWeight = FontWeight.Bold)
+            Text("CREATE ELECTION", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = TextSecondary, letterSpacing = 2.sp)
+            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = electionName,
                 onValueChange = { electionName = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Title") },
-                label = { Text("Election Title") }
+                placeholder = { Text("Enter Election Title...", color = TextMuted) },
+                label = { Text("ELECTION TITLE") },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Primary,
+                    unfocusedBorderColor = Primary.copy(alpha = 0.1f),
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Starting Date", fontWeight = FontWeight.Bold)
+            Text("STARTING DATE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = TextSecondary, letterSpacing = 2.sp)
+            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = startingDate,
                 onValueChange = { startingDate = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("YYYY-MM-DD HH:MM:SS") },
-                label = { Text("Start Date") }
+                placeholder = { Text("YYYY-MM-DD HH:MM:SS", color = TextMuted) },
+                label = { Text("START DATE") },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Primary,
+                    unfocusedBorderColor = Primary.copy(alpha = 0.1f),
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Ending date", fontWeight = FontWeight.Bold)
+            Text("ENDING DATE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = TextSecondary, letterSpacing = 2.sp)
+            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = endingDate,
                 onValueChange = { endingDate = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("YYYY-MM-DD HH:MM:SS") },
-                label = { Text("End Date") }
+                placeholder = { Text("YYYY-MM-DD HH:MM:SS", color = TextMuted) },
+                label = { Text("END DATE") },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Primary,
+                    unfocusedBorderColor = Primary.copy(alpha = 0.1f),
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -99,21 +127,31 @@ fun CreateElectionScreen(navController: NavController) {
             
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Button(
                     onClick = { 
                         if(electionName.isNotEmpty() && startingDate.isNotEmpty() && endingDate.isNotEmpty()) {
                             viewModel.createElection(electionName, startingDate, endingDate)
                         } 
                     }, 
-                    colors = ButtonDefaults.buttonColors(Color(0xFF6743FF)),
+                    modifier = Modifier.weight(1f).height(60.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(Primary),
                     enabled = !isLoading
                 ) {
-                    Text("Create Election")
+                    Text("CREATE NOW", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
                 
-                Button(onClick = { navController.popBackStack() }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
-                    Text("Cancel")
+                Button(
+                    onClick = { navController.popBackStack() }, 
+                    modifier = Modifier.weight(1f).height(60.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary.copy(alpha = 0.1f))
+                ) {
+                    Text("CANCEL", color = Primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
             }
         }

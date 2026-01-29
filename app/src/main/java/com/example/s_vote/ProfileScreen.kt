@@ -18,12 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import kotlinx.coroutines.launch
+import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,9 +74,9 @@ fun ProfileScreen(navController: NavController) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
+            Color(0xFFEEF2FF),
+            Color(0xFFE0E7FF),
+            Color(0xFFF1F5F9)
         )
     )
 
@@ -84,20 +86,21 @@ fun ProfileScreen(navController: NavController) {
                 title = { 
                     Text(
                         "MY ACCOUNT",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        letterSpacing = 2.sp
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        letterSpacing = 1.sp
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
+                    containerColor = BackgroundLight,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         },
@@ -106,7 +109,7 @@ fun ProfileScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundGradient)
+                .background(BackgroundLight)
         ) {
             // Background Glows
             Box(
@@ -129,17 +132,13 @@ fun ProfileScreen(navController: NavController) {
                         .verticalScroll(rememberScrollState())
                         .padding(24.dp)
                 ) {
-                    // Profile Header Card (Glass)
+                    // Profile Header Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(32.dp))
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(
-                                1.dp,
-                                Color.White.copy(alpha = 0.1f),
-                                RoundedCornerShape(32.dp)
-                            )
+                            .background(SurfaceLight)
+                            .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -148,32 +147,32 @@ fun ProfileScreen(navController: NavController) {
                                 modifier = Modifier
                                     .size(80.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .border(2.dp, Color(0xFF6743FF), CircleShape)
+                                    .background(BackgroundLight)
+                                    .border(2.dp, Primary, CircleShape)
                                     .padding(4.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.2f)),
+                                    .background(Primary.copy(alpha = 0.05f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     if (name.isNotEmpty()) name.take(1).uppercase() else "U",
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White
+                                    style = MaterialTheme.typography.displaySmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Primary
                                 )
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(
                                 name.uppercase(),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextPrimary,
                                 letterSpacing = 1.sp
                             )
                             Text(
                                 studentId.uppercase(),
-                                fontSize = 12.sp,
-                                color = Color.White.copy(alpha = 0.5f),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = TextSecondary,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
@@ -184,10 +183,10 @@ fun ProfileScreen(navController: NavController) {
 
                     Text(
                         "PERSONAL INFORMATION",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        letterSpacing = 2.sp
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary,
+                        letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -207,9 +206,9 @@ fun ProfileScreen(navController: NavController) {
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(
                             "DATE OF BIRTH", 
-                            fontSize = 10.sp, 
-                            fontWeight = FontWeight.Black, 
-                            color = Color.White.copy(alpha = 0.4f),
+                            style = MaterialTheme.typography.labelSmall, 
+                            fontWeight = FontWeight.Bold, 
+                            color = TextSecondary,
                             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
                         )
                         Box(
@@ -217,8 +216,8 @@ fun ProfileScreen(navController: NavController) {
                                 .fillMaxWidth()
                                 .height(56.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                .background(SurfaceLight)
+                                .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
                                 .clickable { datePickerDialog.show() }
                                 .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.CenterStart
@@ -230,12 +229,13 @@ fun ProfileScreen(navController: NavController) {
                             ) {
                                 Text(
                                     if (dob.isEmpty()) "Select Date" else dob,
-                                    color = if (dob.isEmpty()) Color.White.copy(alpha = 0.3f) else Color.White
+                                    color = if (dob.isEmpty()) TextMuted else TextPrimary,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                                 Icon(
                                     painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_my_calendar),
                                     contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.5f),
+                                    tint = Primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -277,15 +277,14 @@ fun ProfileScreen(navController: NavController) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(28.dp)),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6743FF)),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                            .height(60.dp)
+                            .clip(RoundedCornerShape(30.dp)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Text("SAVE & UPDATE", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                            Text("SAVE & UPDATE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         }
                     }
                     Spacer(modifier = Modifier.height(32.dp))
@@ -300,9 +299,9 @@ fun ModernProfileField(label: String, value: String, onValueChange: (String) -> 
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Text(
             label, 
-            fontSize = 10.sp, 
-            fontWeight = FontWeight.Black, 
-            color = Color.White.copy(alpha = 0.4f),
+            style = MaterialTheme.typography.labelSmall, 
+            fontWeight = FontWeight.Bold, 
+            color = TextSecondary,
             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
         )
         OutlinedTextField(
@@ -312,13 +311,14 @@ fun ModernProfileField(label: String, value: String, onValueChange: (String) -> 
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-                focusedBorderColor = Color.White.copy(alpha = 0.4f),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
-            )
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = SurfaceLight,
+                unfocusedContainerColor = SurfaceLight,
+                focusedBorderColor = Primary,
+                unfocusedBorderColor = Primary.copy(alpha = 0.1f)
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium
         )
     }
 }

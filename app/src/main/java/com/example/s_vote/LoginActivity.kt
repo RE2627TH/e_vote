@@ -34,6 +34,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.s_vote.navigation.Routes
+import com.example.s_vote.ui.theme.*
 // 👇 THESE IMPORTS ARE CRITICAL - DO NOT REMOVE
 import com.example.s_vote.viewmodel.LoginViewModel
 import com.example.s_vote.viewmodel.LoginState
@@ -104,26 +105,25 @@ fun LoginScreen(navController: NavController) {
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F0533),
-            Color(0xFF2104A1),
-            Color(0xFF6743FF)
+            BackgroundLight,
+            SurfaceLight
         )
     )
 
     Scaffold(
-        containerColor = Color.Transparent
+        containerColor = BackgroundLight
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundGradient)
         ) {
-            // Background Glows
+            // Background Glows - Subtler for Light Theme
             Box(
                 modifier = Modifier
                     .size(400.dp)
-                    .offset(y = (-100).dp, x = (-100).dp)
-                    .background(Color(0xFFFF3DA6).copy(alpha = 0.1f), CircleShape)
+                    .offset(y = (-150).dp, x = (-150).dp)
+                    .background(Primary.copy(alpha = 0.1f), CircleShape)
                     .align(Alignment.TopStart)
             )
 
@@ -137,59 +137,53 @@ fun LoginScreen(navController: NavController) {
             ) {
                 Spacer(Modifier.height(48.dp))
 
-                // Logo Glass Container
+                // Logo Container - Refined for professional look
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp)),
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, OutlineColor, RoundedCornerShape(28.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_thumb_up),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(56.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
+                        modifier = Modifier.size(48.dp),
+                        colorFilter = ColorFilter.tint(Primary)
                     )
                 }
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Text(
                     text = "E-VOTE",
-                    fontSize = 32.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = TextPrimary,
                     letterSpacing = 4.sp
                 )
                 
-                Box(
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        "Secure & Verified Election Access",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.sp
-                    )
-                }
+                Text(
+                    "Secure Digital Election Portal",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
                 Spacer(Modifier.height(48.dp))
 
                 // ROLE TOGGLE
                 Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = Color.White.copy(alpha = 0.05f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
-                    modifier = Modifier.height(56.dp).fillMaxWidth()
+                    shape = RoundedCornerShape(16.dp),
+                    color = SurfaceLight,
+                    modifier = Modifier.height(56.dp).fillMaxWidth(),
+                    border = BorderStroke(1.dp, OutlineColor)
                 ) {
-                    Row(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier.fillMaxSize().padding(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         RoleButton("STUDENT", selectedRole == LoginActivityRole.Student, Modifier.weight(1f)) {
                             selectedRole = LoginActivityRole.Student
                         }
@@ -225,8 +219,9 @@ fun LoginScreen(navController: NavController) {
                     TextButton(onClick = { navController.navigate(Routes.FORGOT_PASSWORD) }) {
                         Text(
                             "Forgot Password?", 
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelLarge
+                            color = Secondary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -237,38 +232,39 @@ fun LoginScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (email.isNotEmpty() && password.isNotEmpty()) {
-                            viewModel.login(email, password)
+                            viewModel.login(email, password, selectedRole.name)
                         } else {
                             Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .clip(RoundedCornerShape(30.dp)),
+                        .height(60.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6743FF),
+                        containerColor = Primary,
                         contentColor = Color.White
                     ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                      if (loginState is LoginState.Loading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("SIGN IN", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                        Text("SIGN IN", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(16.dp))
 
                 // REGISTER
-                OutlinedButton(
+                TextButton(
                     onClick = { navController.navigate(Routes.REGISTRATION) },
-                    modifier = Modifier.fillMaxWidth().height(60.dp),
-                    shape = RoundedCornerShape(30.dp),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
                 ) {
-                    Text("CREATE ACCOUNT", color = Color.White, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("New here? ", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                        Text("Create Account", color = Secondary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    }
                 }
                 
                 Spacer(Modifier.height(48.dp))
@@ -279,23 +275,26 @@ fun LoginScreen(navController: NavController) {
 
 @Composable
 fun RoleButton(text: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val bgColor = if (selected) Color.White.copy(alpha = 0.15f) else Color.Transparent
-    val contentColor = if (selected) Color.White else Color.White.copy(alpha = 0.4f)
+    val bgColor = if (selected) Primary else Color.Transparent
+    val contentColor = if (selected) Color.White else TextSecondary
+    val elevation = if (selected) 4.dp else 0.dp
     
-    Box(
+    Surface(
         modifier = modifier
             .fillMaxHeight()
-            .background(bgColor)
             .clickable { onClick() },
-        contentAlignment = Alignment.Center
+        shape = RoundedCornerShape(8.dp),
+        color = bgColor,
+        shadowElevation = elevation
     ) {
-        Text(
-            text, 
-            color = contentColor, 
-            fontSize = 10.sp, 
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.sp
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text, 
+                color = contentColor, 
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+            )
+        }
     }
 }
 
@@ -309,18 +308,21 @@ fun ModernTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(label, color = Color.White.copy(alpha = 0.3f)) },
+        label = { Text(label) },
+        placeholder = { Text(label, color = TextSecondary.copy(alpha = 0.4f)) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedContainerColor = Color.White.copy(alpha = 0.05f),
-            unfocusedContainerColor = Color.White.copy(alpha = 0.02f),
-            focusedBorderColor = Color.White.copy(alpha = 0.4f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.1f)
+            focusedTextColor = TextPrimary,
+            unfocusedTextColor = TextPrimary,
+            focusedContainerColor = SurfaceLight.copy(alpha = 0.5f),
+            unfocusedContainerColor = SurfaceLight.copy(alpha = 0.3f),
+            focusedBorderColor = Primary,
+            unfocusedBorderColor = OutlineColor,
+            focusedLabelColor = Primary,
+            unfocusedLabelColor = TextSecondary
         )
     )
 }
