@@ -41,3 +41,4 @@ node_modules/
 Thumbs.db
 ehthumbs.db
 .DS_Store
+backend/api/E_vote_api/firebase_key.json
