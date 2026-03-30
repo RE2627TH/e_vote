@@ -1,15 +1,43 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Android / Gradle
+.gradle/
+/build/
+Frontend/build/
+Frontend/app/build/
+captures/
+.externalNativeBuild/
+.cxx/
 local.properties
+
+# IDEs and Editors
+.idea/
+Frontend/.idea/
+*.iml
+*.iws
+.DS_Store
+.vscode/
+
+# Python / Machine Learning
+__pycache__/
+*.py[cod]
+*$py.class
+dataset/
+Frontend/backend/ai/OCR_EVoting_Project/dataset/
+backend/ai/OCR_EVoting_Project/dataset/
+*.h5
+*.tflite
+venv/
+.env
+
+# PHP / Web
+vendor/
+node_modules/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+.DS_Store
