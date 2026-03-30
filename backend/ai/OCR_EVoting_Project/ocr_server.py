@@ -224,5 +224,5 @@ def ocr():
 
 if __name__ == '__main__':
     print(f"INFO: Server starting on http://0.0.0.0:5000")
-    print(f"INFO: Use your computer's IP (10.57.135.24) to connect from Android.")
+    print(f"INFO: Use your computer's IP (192.168.43.139) to connect from Android.")
     app.run(host='0.0.0.0', port=5000, debug=False) # Debug False for stability
