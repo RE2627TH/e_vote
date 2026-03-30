@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     // THIS IS NOW PUBLIC
     // UPDATE: Apache is running on port 8080 (from XAMPP screenshot)
-    const val BASE_URL = "http://10.122.1.24:8080/E_vote_api/"
+    const val BASE_URL = "http://192.168.43.139:8080/E_vote_api/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

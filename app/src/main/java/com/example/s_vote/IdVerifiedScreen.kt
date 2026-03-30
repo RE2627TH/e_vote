@@ -40,17 +40,22 @@ fun IdVerifiedScreen(
     studentId: String,
     position: String
 ) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val userId = sessionManager.getUserId() ?: ""
+    
     var editableName by remember { mutableStateOf(studentName) }
     var editableDept by remember { mutableStateOf(department) }
     var editableId by remember { mutableStateOf(studentId) }
     var isConfirmed by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
+    // Verification Logic State
+    var currentUserStudentId by remember { mutableStateOf<String?>(null) }
+    var isProfileLoading by remember { mutableStateOf(false) }
+    var fetchError by remember { mutableStateOf<String?>(null) }
+
     val voteViewModel: com.example.s_vote.viewmodel.VoteViewModel = viewModel()
     val voteState by voteViewModel.voteState.collectAsState()
-    
-    val sharedPref = context.getSharedPreferences("s_vote_prefs", android.content.Context.MODE_PRIVATE)
-    val userId = sharedPref.getString("USER_ID", "") ?: ""
 
     LaunchedEffect(voteState) {
         when(voteState) {
@@ -70,6 +75,27 @@ fun IdVerifiedScreen(
 
     val scrollState = rememberScrollState()
     
+    LaunchedEffect(isConfirmed, userId) {
+        if (isConfirmed && userId.isNotEmpty() && currentUserStudentId == null) {
+            isProfileLoading = true
+            fetchError = null
+            try {
+                val response = com.example.s_vote.api.RetrofitInstance.api.getProfile(userId)
+                if (response.isSuccessful && response.body() != null) {
+                    currentUserStudentId = response.body()!!.user.studentId
+                    android.util.Log.d("VERIFY", "Fetched Student ID: $currentUserStudentId")
+                } else {
+                    fetchError = "Profile fetch failed"
+                }
+            } catch (e: Exception) {
+                fetchError = "Verification network error"
+                android.util.Log.e("VERIFY", "Error", e)
+            } finally {
+                isProfileLoading = false
+            }
+        }
+    }
+
     LaunchedEffect(isConfirmed) {
         if (isConfirmed) {
             scrollState.animateScrollTo(scrollState.maxValue)
@@ -235,36 +261,17 @@ fun IdVerifiedScreen(
                 }
 
                 if (isConfirmed) {
-                    // Verification Logic
-                    var currentUserStudentId by remember { mutableStateOf<String?>(null) }
-                    var isProfileLoading by remember { mutableStateOf(true) }
-                    var fetchError by remember { mutableStateOf<String?>(null) }
-
-                    LaunchedEffect(userId) {
-                        if (userId.isNotEmpty()) {
-                            try {
-                                val response = com.example.s_vote.api.RetrofitInstance.api.getProfile(userId)
-                                if (response.isSuccessful && response.body() != null) {
-                                    currentUserStudentId = response.body()!!.user.studentId
-                                } else {
-                                    fetchError = "Profile fetch failed"
-                                }
-                            } catch (e: Exception) {
-                                fetchError = "Verification error"
-                            } finally {
-                                isProfileLoading = false
-                            }
-                        }
-                    }
-
                     val isMatched = !currentUserStudentId.isNullOrEmpty() && 
                                    editableId.trim().equals(currentUserStudentId?.trim(), ignoreCase = true)
 
                     if (isProfileLoading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        CircularProgressIndicator(color = Primary, modifier = Modifier.size(32.dp).padding(8.dp))
                     } else if (fetchError != null) {
-                        Text(text = "CONNECTION ERROR", color = Color.Red, fontWeight = FontWeight.Black, fontSize = 12.sp)
-                        TextButton(onClick = { isConfirmed = false }) { Text("RETRY", color = Color.White) }
+                        Text(text = fetchError!!, color = Color.Red, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                        TextButton(onClick = { 
+                            isConfirmed = false
+                            currentUserStudentId = null
+                        }) { Text("RETRY", color = Primary) }
                     } else if (isMatched) {
                         Box(
                             modifier = Modifier

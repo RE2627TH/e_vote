@@ -47,13 +47,8 @@ fun AdminDashboardScreen(navController: NavController) {
                         letterSpacing = 2.sp
                     ) 
                 },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
-                    }
-                },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATIONS) }) {
                         Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = TextPrimary)
                     }
                 },
@@ -93,13 +88,15 @@ fun AdminDashboardScreen(navController: NavController) {
                     icon = Icons.Default.Groups, 
                     value = stats?.studentsCount ?: "0", 
                     label = "Students",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController.navigate(Routes.ADMIN_STUDENT_LIST) }
                 )
                 StatTile(
                     icon = Icons.Default.People, 
                     value = stats?.candidatesCount ?: "0", 
                     label = "Candidates",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController.navigate(Routes.ADMIN_CANDIDATE_LIST) }
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -135,7 +132,7 @@ fun AdminDashboardScreen(navController: NavController) {
                     icon = Icons.Default.PersonSearch, 
                     title = "Verify Candidates", 
                     subtitle = "Approve or reject applications",
-                    onClick = { navController.navigate(Routes.ADMIN_HOME) }
+                    onClick = { navController.navigate(Routes.MANAGE_CANDIDATES) }
                 )
                 ActionTile(
                     icon = Icons.Default.PostAdd, 
@@ -152,9 +149,9 @@ fun AdminDashboardScreen(navController: NavController) {
                     )
                     ActionTileSmall(
                         icon = Icons.Default.BarChart, 
-                        title = "Results", 
+                        title = "Elections", 
                         modifier = Modifier.weight(1f),
-                        onClick = { navController.navigate(Routes.RESULT) }
+                        onClick = { navController.navigate(Routes.ADMIN_ELECTION_LIST) }
                     )
                 }
             }
@@ -162,8 +159,12 @@ fun AdminDashboardScreen(navController: NavController) {
             Spacer(modifier = Modifier.weight(1f))
 
             // Logout Footer
+            val sessionManager = SessionManager(androidx.compose.ui.platform.LocalContext.current)
             OutlinedButton(
-                onClick = { navController.navigate(Routes.LOGIN) { popUpTo(0) } },
+                onClick = { 
+                    sessionManager.logout()
+                    navController.navigate(Routes.LOGIN) { popUpTo(0) } 
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -180,8 +181,9 @@ fun AdminDashboardScreen(navController: NavController) {
 }
 
 @Composable
-fun StatTile(icon: androidx.compose.ui.graphics.vector.ImageVector, value: String, label: String, modifier: Modifier = Modifier) {
+fun StatTile(icon: androidx.compose.ui.graphics.vector.ImageVector, value: String, label: String, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     Surface(
+        onClick = onClick,
         modifier = modifier.height(110.dp),
         shape = RoundedCornerShape(24.dp),
         color = SurfaceLight,

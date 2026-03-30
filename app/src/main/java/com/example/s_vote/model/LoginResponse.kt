@@ -7,5 +7,9 @@ data class LoginResponse(
     val message: String?,   // ✅ nullable
     val user_id: Int? = null,
     val student_id: String? = null,
-    val role: String? = null
+    val role: String? = null,
+    val token: String? = null,
+    val is_subscribed: Int = 0,
+    val is_profile_completed: Int = 0,
+    val redirect_to_form: Boolean? = null
 )

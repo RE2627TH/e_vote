@@ -1,5 +1,7 @@
 package com.example.s_vote.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,7 +18,11 @@ fun AppNavGraph(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.SPLASH
+        startDestination = Routes.SPLASH,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
     ) {
 
         // ---------- SPLASH ----------
@@ -26,14 +32,36 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.REGISTRATION) { RegistrationScreen(navController) }
         composable(Routes.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
+        composable(Routes.PROFILE_SETUP) { ProfileSetupScreen(navController) }
+        
+        composable(
+            route = Routes.SUBSCRIPTION,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("role") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            val role = backStackEntry.arguments?.getString("role") ?: ""
+            SubscriptionScreen(navController, userId, role)
+        }
 
         // ---------- STUDENT ----------
         composable(Routes.HOME) { HomeScreen(navController) }
         composable(Routes.MANIFESTO) { ManifestoScreen(navController) }
         composable(Routes.PROFILE) { ProfileScreen(navController) }
+        composable(Routes.EDIT_PROFILE) { EditProfileScreen(navController) }
         composable(Routes.POLL_HISTORY) { PollHistoryScreen(navController) }
         composable(Routes.RESULT) { ResultScreen(navController) }
         composable(Routes.FAQ) { FAQScreen(navController) }
+
+        composable(
+            route = Routes.ELECTION_DETAIL,
+            arguments = listOf(navArgument("electionId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val electionId = backStackEntry.arguments?.getString("electionId") ?: ""
+            ElectionDetailScreen(navController, electionId)
+        }
 
         composable(
             route = Routes.CANDIDATE_LIST,
@@ -122,8 +150,36 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Routes.ADMIN_HOME) { AdminDashboardScreen(navController) }
         composable(Routes.MANAGE_CANDIDATES) { AdminHomeScreen(navController) }
         composable(Routes.CREATE_ELECTION) { CreateElectionScreen(navController) }
-        composable(Routes.ADMIN_RESULTS) { AdminResultsScreen(navController) }
+        composable(Routes.ADMIN_ELECTION_LIST) { AdminElectionListScreen(navController) }
+        composable(
+            route = Routes.ADMIN_RESULTS,
+            arguments = listOf(navArgument("electionId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val electionId = backStackEntry.arguments?.getString("electionId") ?: ""
+            AdminResultsScreen(navController, electionId)
+        }
         composable(Routes.REPORTS) { AdminReportsScreen(navController) }
+        
+        composable(
+            route = Routes.ADMIN_CANDIDATE_REVIEW,
+            arguments = listOf(navArgument("candidateId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val candidateId = backStackEntry.arguments!!.getString("candidateId")!!
+            AdminCandidateReviewScreen(navController, candidateId)
+        }
+
+        composable(Routes.ADMIN_STUDENT_LIST) { AdminStudentListScreen(navController) }
+        composable(Routes.ADMIN_CANDIDATE_LIST) { AdminCandidateListScreen(navController) }
+
+        composable(
+            route = Routes.ADMIN_STUDENT_DETAIL,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments!!.getString("userId")!!
+            AdminStudentDetailScreen(navController, userId)
+        }
+        
+        composable(Routes.NOTIFICATIONS) { AdminNotificationScreen(navController) }
 
         // ---------- CANDIDATE ----------
         composable(
@@ -144,6 +200,14 @@ fun AppNavGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val candidateId = backStackEntry.arguments!!.getString("candidateId")!!
             ManageCandidateProfileScreen(navController = navController, candidateId = candidateId)
+        }
+
+        composable(
+            route = Routes.EDIT_CANDIDATE_PROFILE,
+            arguments = listOf(navArgument("candidateId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val candidateId = backStackEntry.arguments!!.getString("candidateId")!!
+            EditCandidateProfileScreen(navController = navController, candidateId = candidateId)
         }
 
         composable(

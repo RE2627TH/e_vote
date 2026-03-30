@@ -8,6 +8,7 @@ import com.example.s_vote.model.AppUser
 import com.example.s_vote.model.Candidate
 import com.example.s_vote.model.CandidateApplicationRequest
 import com.example.s_vote.model.CandidateApplicationResponse
+import com.example.s_vote.model.ProfileResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,14 +29,30 @@ class CandidateViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _activeElection = MutableStateFlow<com.example.s_vote.ElectionStatus?>(null)
+    val activeElection: StateFlow<com.example.s_vote.ElectionStatus?> = _activeElection.asStateFlow()
+
     private val _submitSuccess = MutableStateFlow<CandidateApplicationResponse?>(null)
     val submitSuccess: StateFlow<CandidateApplicationResponse?> = _submitSuccess.asStateFlow()
 
-    fun fetchCandidates() {
+    fun fetchCandidates(position: String = "ALL") {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = RetrofitInstance.api.getCandidates()
+                // Map navigation role names to exact DB position strings
+                val apiPosition = when(position.lowercase().replace(" ", "_")) {
+                    "all_candidates", "all" -> "ALL"
+                    "president" -> "President"
+                    "vice_president" -> "Vice President"
+                    "sports_secretary" -> "Sports Secretary"
+                    "cultural_secretary" -> "Cultural Secretary"
+                    "discipline_secretary" -> "Discipline Secretary"
+                    "treasurer" -> "Treasurer"
+                    else -> position // Fallback for direct matches
+                }
+                
+                // Fetch only ACCEPTED (Approved) candidates that are ready for viewing/voting
+                val response = RetrofitInstance.api.getCandidatesByStatus("ACCEPTED", apiPosition)
                 if (response.isSuccessful) {
                     _candidates.value = response.body() ?: emptyList()
                 } else {
@@ -53,13 +70,16 @@ class CandidateViewModel : ViewModel() {
     fun submitCandidateApplication(
         userId: String,
         name: String,
-        dob: String,
         studentId: String,
-        email: String,
-        phone: String,
-        department: String,
         position: String,
-        manifesto: String
+        manifesto: String,
+        course: String,
+        college: String,
+        goals: String,
+        pledges: String,
+        symbolName: String,
+        photo: String?,
+        symbol: String?
     ) {
         _isLoading.value = true
         _errorMessage.value = null
@@ -70,13 +90,16 @@ class CandidateViewModel : ViewModel() {
                 val request = CandidateApplicationRequest(
                     userId = userId,
                     name = name,
-                    dob = dob,
                     studentId = studentId,
-                    email = email,
-                    phone = phone,
-                    department = department,
                     position = position,
-                    manifesto = manifesto
+                    manifesto = manifesto,
+                    course = course,
+                    college = college,
+                    goals = goals,
+                    pledges = pledges,
+                    symbolName = symbolName,
+                    photo = photo,
+                    symbol = symbol
                 )
 
                 val response = RetrofitInstance.api.submitApplication(request)
@@ -103,15 +126,28 @@ class CandidateViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val result = RetrofitInstance.api.getProfile(userId)
-                if (result.isSuccessful) {
-                    _profile.value = result.body()?.user   // ❌ causes error
+                if (result.isSuccessful && result.body()?.success == true) {
+                    _profile.value = result.body()?.user
                 } else {
-                    _errorMessage.value = result.message()
+                    _errorMessage.value = result.body()?.message ?: "Failed to load candidate profile."
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Error: ${e.message}"
+                _errorMessage.value = "Connection Error: ${e.message}"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchActiveElection() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getActiveElection()
+                if (response.isSuccessful && response.body() != null) {
+                    _activeElection.value = response.body()
+                }
+            } catch (e: Exception) {
+                // Fail silently
             }
         }
     }
@@ -132,6 +168,7 @@ class CandidateViewModel : ViewModel() {
         tagline: String,
         goals: String,
         pledges: String,
+        symbolName: String,
         photo: String?,
         symbol: String?
     ) {
@@ -139,7 +176,7 @@ class CandidateViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val request = com.example.s_vote.model.UpdateProfileRequest(
-                    userId, name, course, college, tagline, goals, pledges, photo, symbol
+                    userId, name, course, college, tagline, goals, pledges, symbolName, photo, symbol
                 )
                 val response = RetrofitInstance.api.updateProfile(request)
                 if (response.isSuccessful) {

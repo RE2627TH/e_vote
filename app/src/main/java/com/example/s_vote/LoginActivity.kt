@@ -72,6 +72,11 @@ fun LoginScreen(navController: NavController) {
 
                 val normalizedRole = role.trim().lowercase()
 
+                val sessionManager = SessionManager(context)
+                val userId = sessionManager.getUserId() ?: "0"
+                val sharedPref = context.getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
+                val isSubscribed = sharedPref.getBoolean("is_subscribed", false)
+
                 when {
                     normalizedRole == "admin" -> {
                         navController.navigate(Routes.ADMIN_HOME) {
@@ -79,18 +84,29 @@ fun LoginScreen(navController: NavController) {
                         }
                     }
                     normalizedRole == "candidate" -> {
-                        val sharedPref = context.getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
-                        val userId = sharedPref.getString("USER_ID", "1") ?: "1"
-
                         navController.navigate("candidate_dashboard/$userId") {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     }
                     else -> { // Default to Student Home
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        if (sessionManager.isProfileCompleted()) {
+                            navController.navigate(Routes.HOME) {
+                                popUpTo(Routes.LOGIN) { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate(Routes.PROFILE_SETUP) {
+                                popUpTo(Routes.LOGIN) { inclusive = true }
+                            }
                         }
                     }
+                }
+                viewModel.resetState()
+            }
+            is LoginState.RedirectToForm -> {
+                val userId = (loginState as LoginState.RedirectToForm).userId
+                Toast.makeText(context, "Redirecting to application form...", Toast.LENGTH_SHORT).show()
+                navController.navigate("candidate_application/$userId") {
+                    popUpTo(Routes.LOGIN) { inclusive = true }
                 }
                 viewModel.resetState()
             }

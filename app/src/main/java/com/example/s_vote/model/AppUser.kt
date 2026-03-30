@@ -11,5 +11,10 @@ data class AppUser(
     @SerializedName("college") val college: String? = null,
     @SerializedName("dob") val dob: String? = null,
     @SerializedName("student_id") val studentId: String? = null,
+    @SerializedName("is_subscribed") val isSubscribed: Int = 0,
+    @SerializedName("payment_id") val paymentId: String? = null,
+    @SerializedName("profile_photo") val profilePhoto: String? = null,
+    @SerializedName("position") val position: String? = null,
+    @SerializedName("application_status") val applicationStatus: String? = null,
     @SerializedName("candidate_details") val candidateDetails: Candidate? = null
 )

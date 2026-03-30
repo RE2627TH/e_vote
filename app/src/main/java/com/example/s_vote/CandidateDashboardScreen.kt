@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.MenuBook
@@ -47,12 +48,13 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
 
     val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val profile by viewModel.profile.collectAsState()
-
+    val activeElection by viewModel.activeElection.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     LaunchedEffect(candidateId) {
         viewModel.fetchProfile(candidateId)
+        viewModel.fetchActiveElection()
     }
 
     Scaffold(
@@ -67,8 +69,40 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                     ) 
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate(Routes.LOGIN) { popUpTo(0) } }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val sessionManager = SessionManager(context)
+                    var showLogoutDialog by remember { mutableStateOf(false) }
+
+                    IconButton(onClick = { showLogoutDialog = true }) {
+                        Icon(Icons.Default.Logout, contentDescription = "Logout", tint = Error)
+                    }
+
+                    if (showLogoutDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showLogoutDialog = false },
+                            title = { Text("Sign Out", fontWeight = FontWeight.Bold) },
+                            text = { Text("Are you sure you want to sign out?") },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showLogoutDialog = false
+                                        sessionManager.logout()
+                                        navController.navigate(com.example.s_vote.navigation.Routes.LOGIN) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                ) {
+                                    Text("LOGOUT", color = Error, fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showLogoutDialog = false }) {
+                                    Text("CANCEL", color = TextSecondary)
+                                }
+                            },
+                            containerColor = SurfaceLight,
+                            shape = RoundedCornerShape(28.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -176,6 +210,10 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                     )
                                 }
 
+                                val symbolUrl = candidateDesc?.symbolUrl?.let { path ->
+                                    if (path.startsWith("http")) path else "${ApiClient.BASE_URL}$path"
+                                }
+
                             // Symbol Overlay (Bottom Right)
                                 Box(
                                     modifier = Modifier
@@ -183,16 +221,26 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                         .offset(x = 4.dp, y = 4.dp)
                                         .size(32.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF2C097F))
-                                        .border(2.dp, Color.White, CircleShape),
+                                        .background(Color.White)
+                                        .border(2.dp, Primary, CircleShape)
+                                        .padding(4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MenuBook,
-                                        contentDescription = "Symbol",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    if (symbolUrl != null) {
+                                        coil.compose.AsyncImage(
+                                            model = symbolUrl,
+                                            contentDescription = "Symbol",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.MenuBook,
+                                            contentDescription = "Symbol",
+                                            tint = Primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
                             }
 
@@ -208,8 +256,17 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                 Text(
                                     text = (candidateDesc?.position ?: "Candidate").uppercase(),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = TextSecondary,
+                                    color = Primary,
+                                    fontWeight = FontWeight.Bold,
                                     letterSpacing = 2.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "${candidateDesc?.course ?: profile?.department ?: "N/A"} | ${candidateDesc?.college ?: profile?.college ?: "N/A"}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.5.sp
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 
@@ -248,44 +305,46 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                     }
 
                     // ---------------- NOTIFICATION BANNER ----------------
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(SurfaceLight)
-                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
-                            .padding(24.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.Top) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(Primary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Campaign,
-                                    contentDescription = "Campaign",
-                                    tint = Primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    "VOTING IS LIVE",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    color = TextPrimary,
-                                    letterSpacing = 1.sp
-                                )
-                                Text(
-                                    "Polls are open from 9 AM to 5 PM. Your symbol is now visible to all voters on the ballot.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary,
-                                    lineHeight = 18.sp,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
+                    if (activeElection != null && activeElection?.status?.equals("active", ignoreCase = true) == true) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(SurfaceLight)
+                                .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+                                .padding(24.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.Top) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .background(Primary.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Campaign,
+                                        contentDescription = "Campaign",
+                                        tint = Primary
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Column {
+                                    Text(
+                                        "VOTING IS LIVE",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Black,
+                                        color = TextPrimary,
+                                        letterSpacing = 1.sp
+                                    )
+                                    Text(
+                                        "${activeElection?.title}: Polls are open. Your symbol is now visible to all voters on the ballot.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextSecondary,
+                                        lineHeight = 18.sp,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -375,19 +434,27 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                     val symbolUrl = candidateDesc?.symbolUrl?.let {
                                         if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
                                     }
-                                    coil.compose.AsyncImage(
-                                        model = symbolUrl ?: Icons.Default.CheckCircle, 
-                                        contentDescription = "Symbol",
-                                        modifier = Modifier.size(32.dp),
-                                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                        colorFilter = if (candidateDesc?.symbolUrl == null) androidx.compose.ui.graphics.ColorFilter.tint(Color(0xFF2C097F)) else null
-                                    )
+                                    if (symbolUrl != null) {
+                                        coil.compose.AsyncImage(
+                                            model = symbolUrl, 
+                                            contentDescription = "Symbol",
+                                            modifier = Modifier.size(32.dp),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = "Symbol",
+                                            modifier = Modifier.size(32.dp),
+                                            tint = Color(0xFF2C097F)
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        "Your Symbol",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF616F89),
+                                        candidateDesc?.symbolName ?: "Your Symbol",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Primary,
                                         letterSpacing = 0.5.sp
                                     )
                                 }
@@ -464,14 +531,14 @@ fun CandidateDashboardScreen(navController: NavController, candidateId: String) 
                                 modifier = Modifier.weight(1f),
                                 onClick = { navController.navigate(Routes.RESULT) } // Or Routes.RESULT
                             )
-                            // Button 4: Edit Details
+                            // Button 4: Other Candidates
                             QuickActionButton(
-                                icon = Icons.Default.Edit,
-                                label = "Edit",
-                                color = Secondary, // Indigo 400
-                                bg = Secondary.copy(alpha = 0.1f),
+                                icon = Icons.Default.Person, // Fallback to Person or similar if Groups is truly missing
+                                label = "Others",
+                                color = Color(0xFFF59E0B), // Amber/Orange
+                                bg = Color(0xFFFFF7ED),
                                 modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("candidate_profile/${candidateId}") }
+                                onClick = { navController.navigate("candidate_list/All_Candidates") }
                             )
                         }
                     }

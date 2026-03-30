@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.navigation.NavController
@@ -34,9 +36,9 @@ fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
-    // Get User ID from SharedPreferences
-    val sharedPref = context.getSharedPreferences("s_vote_prefs", android.content.Context.MODE_PRIVATE)
-    val userId = sharedPref.getString("USER_ID", "") ?: ""
+    // Get User ID from SessionManager
+    val sessionManager = remember { SessionManager(context) }
+    val userId = sessionManager.getUserId() ?: ""
 
     var name by remember { mutableStateOf("") }
     var department by remember { mutableStateOf("") }
@@ -44,8 +46,10 @@ fun ProfileScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var studentId by remember { mutableStateOf("") }
     var college by remember { mutableStateOf("") }
+    var profilePhoto by remember { mutableStateOf<String?>(null) }
     
     var isLoading by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Fetch Profile Data
     LaunchedEffect(userId) {
@@ -61,8 +65,9 @@ fun ProfileScreen(navController: NavController) {
                     dob = user.dob ?: ""
                     studentId = user.studentId ?: ""
                     college = user.college ?: ""
+                    profilePhoto = user.profilePhoto
                 } else {
-                    android.widget.Toast.makeText(context, "Failed to load profile", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(context, response.body()?.message ?: "Failed to load profile", android.widget.Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
@@ -81,6 +86,7 @@ fun ProfileScreen(navController: NavController) {
     )
 
     Scaffold(
+        bottomBar = { BottomNavBar(navController, selectedRoute = com.example.s_vote.navigation.Routes.PROFILE) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
@@ -154,12 +160,25 @@ fun ProfileScreen(navController: NavController) {
                                     .background(Primary.copy(alpha = 0.05f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    if (name.isNotEmpty()) name.take(1).uppercase() else "U",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Primary
-                                )
+                                val nameInitial = if (name.isNotEmpty()) name.take(1).uppercase() else "U"
+                                
+                                if (!profilePhoto.isNullOrEmpty()) {
+                                    val fullUrl = com.example.s_vote.api.ApiClient.BASE_URL + profilePhoto
+                                    coil.compose.SubcomposeAsyncImage(
+                                        model = fullUrl,
+                                        contentDescription = "Profile Photo",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                        loading = { CircularProgressIndicator(modifier = Modifier.scale(0.5f), strokeWidth = 2.dp) },
+                                        error = {
+                                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                Text(nameInitial, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.ExtraBold, color = Primary)
+                                            }
+                                        }
+                                    )
+                                } else {
+                                    Text(nameInitial, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.ExtraBold, color = Primary)
+                                }
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(
@@ -190,135 +209,103 @@ fun ProfileScreen(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    ModernProfileField(label = "FULL NAME", value = name, onValueChange = { name = it })
-                    ModernProfileField(label = "DEPARTMENT", value = department, onValueChange = { department = it })
-                    
-                    // DOB Picker
-                    val calendar = java.util.Calendar.getInstance()
-                    val datePickerDialog = android.app.DatePickerDialog(
-                        context,
-                        { _, y, m, d -> dob = "$y-${m + 1}-$d" },
-                        calendar.get(java.util.Calendar.YEAR),
-                        calendar.get(java.util.Calendar.MONTH),
-                        calendar.get(java.util.Calendar.DAY_OF_MONTH)
-                    )
-                    
-                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                        Text(
-                            "DATE OF BIRTH", 
-                            style = MaterialTheme.typography.labelSmall, 
-                            fontWeight = FontWeight.Bold, 
-                            color = TextSecondary,
-                            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(SurfaceLight)
-                                .border(1.dp, Primary.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                .clickable { datePickerDialog.show() }
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    if (dob.isEmpty()) "Select Date" else dob,
-                                    color = if (dob.isEmpty()) TextMuted else TextPrimary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Icon(
-                                    painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_my_calendar),
-                                    contentDescription = null,
-                                    tint = Primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    ModernProfileField(label = "OFFICIAL EMAIL", value = email, onValueChange = { email = it })
-                    ModernProfileField(label = "STUDENT ID / ROLL NO.", value = studentId, onValueChange = { studentId = it })
-                    ModernProfileField(label = "COLLEGE / INSTITUTION", value = college, onValueChange = { college = it })
+                    ProfileInfoRow(label = "FULL NAME", value = name)
+                    ProfileInfoRow(label = "DEPARTMENT", value = department)
+                    ProfileInfoRow(label = "DATE OF BIRTH", value = dob)
+                    ProfileInfoRow(label = "OFFICIAL EMAIL", value = email)
+                    ProfileInfoRow(label = "STUDENT ID / ROLL NO.", value = studentId)
+                    ProfileInfoRow(label = "COLLEGE / INSTITUTION", value = college)
 
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Button(
-                        onClick = {
-                            scope.launch {
-                                isLoading = true
-                                try {
-                                    val request = com.example.s_vote.model.UpdateUserProfileRequest(
-                                        userId = userId,
-                                        name = name,
-                                        department = department,
-                                        dob = dob,
-                                        email = email,
-                                        studentId = studentId,
-                                        college = college
-                                    )
-                                    val response = com.example.s_vote.api.RetrofitInstance.api.updateUserProfile(request)
-                                    if (response.isSuccessful && response.body()?.success == true) {
-                                        android.widget.Toast.makeText(context, "Profile Updated Successfully", android.widget.Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        android.widget.Toast.makeText(context, "Update Failed: ${response.body()?.message}", android.widget.Toast.LENGTH_SHORT).show()
-                                    }
-                                } catch (e: Exception) {
-                                    android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
-                        },
+                        onClick = { navController.navigate(com.example.s_vote.navigation.Routes.EDIT_PROFILE) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(60.dp)
                             .clip(RoundedCornerShape(30.dp)),
                         colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     ) {
-                        if (isLoading) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                        } else {
-                            Text("SAVE & UPDATE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                        }
+                        Text("EDIT PROFILE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                     }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // LOGOUT BUTTON
+                    OutlinedButton(
+                        onClick = { showLogoutDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Error.copy(alpha = 0.5f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Error)
+                    ) {
+                        Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text("SIGN OUT", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                    }
+
                     Spacer(modifier = Modifier.height(32.dp))
                 }
+            }
+
+            // Logout Confirmation Dialog
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog = false },
+                    title = { Text("Sign Out", fontWeight = FontWeight.Bold) },
+                    text = { Text("Are you sure you want to sign out of E-vote?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showLogoutDialog = false
+                                sessionManager.logout()
+                                navController.navigate(com.example.s_vote.navigation.Routes.LOGIN) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        ) {
+                            Text("LOGOUT", color = Error, fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showLogoutDialog = false }) {
+                            Text("CANCEL", color = TextSecondary)
+                        }
+                    },
+                    containerColor = SurfaceLight,
+                    shape = RoundedCornerShape(28.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun ModernProfileField(label: String, value: String, onValueChange: (String) -> Unit) {
+fun ProfileInfoRow(label: String, value: String) {
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Text(
             label, 
             style = MaterialTheme.typography.labelSmall, 
             fontWeight = FontWeight.Bold, 
             color = TextSecondary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                focusedContainerColor = SurfaceLight,
-                unfocusedContainerColor = SurfaceLight,
-                focusedBorderColor = Primary,
-                unfocusedBorderColor = Primary.copy(alpha = 0.1f)
-            ),
-            textStyle = MaterialTheme.typography.bodyMedium
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(SurfaceLight.copy(alpha = 0.5f))
+                .border(1.dp, Primary.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                if (value.isEmpty()) "Not Provided" else value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (value.isEmpty()) TextMuted else TextPrimary,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }

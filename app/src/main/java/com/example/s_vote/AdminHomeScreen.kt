@@ -4,6 +4,7 @@ package com.example.s_vote
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
@@ -16,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import com.example.s_vote.navigation.Routes
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
@@ -70,14 +73,14 @@ fun FilterButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
 fun AdminHomeScreen(navController: NavController) {
 
     val viewModel: com.example.s_vote.viewmodel.AdminViewModel = viewModel()
-    val candidateList by viewModel.pendingCandidates.collectAsState()
+    val candidateList by viewModel.candidateReviewList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val message by viewModel.message.collectAsState()
 
     var selectedFilter by remember { mutableStateOf("All") } 
     
     LaunchedEffect(Unit) {
-        viewModel.fetchPendingCandidates()
+        viewModel.fetchCandidateReviewList()
     }
 
     // Toast for messages
@@ -90,8 +93,7 @@ fun AdminHomeScreen(navController: NavController) {
     }
 
     var query by remember { mutableStateOf("") }
-    var showDetailFor by remember { mutableStateOf<com.example.s_vote.model.Candidate?>(null) }
-    var showAddDialog by remember { mutableStateOf(false) } 
+    var showDeleteDialogFor by remember { mutableStateOf<com.example.s_vote.model.Candidate?>(null) }
     var refreshing by remember { mutableStateOf(false) }
 
     // Filter Logic
@@ -124,13 +126,12 @@ fun AdminHomeScreen(navController: NavController) {
                     }
                 },
                 actions = {
-                    TextButton(onClick = { viewModel.fetchPendingCandidates() }) {
-                        Text(
-                            if (isLoading) "SYNCING..." else "SYNC LIST", 
-                            color = Primary,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Black
-                        )
+                    IconButton(onClick = { viewModel.fetchCandidateReviewList() }) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Primary, strokeWidth = 2.dp)
+                        } else {
+                            Icon(painter = painterResource(android.R.drawable.stat_notify_sync), contentDescription = "Refresh", tint = Primary)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -206,8 +207,14 @@ fun AdminHomeScreen(navController: NavController) {
                         
                         // User Card
                         Card(
-                            onClick = { showDetailFor = candidate },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { navController.navigate(Routes.adminCandidateReview(candidate.id ?: "")) },
+                                        onLongPress = { showDeleteDialogFor = candidate }
+                                    )
+                                },
                             shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = SurfaceLight
@@ -258,12 +265,12 @@ fun AdminHomeScreen(navController: NavController) {
                                     
                                     Surface(
                                         shape = RoundedCornerShape(8.dp),
-                                        color = if(candidate.status == "approved") Success.copy(alpha=0.1f) else Warning.copy(alpha=0.1f)
+                                        color = if(candidate.status == "ACCEPTED") Success.copy(alpha=0.1f) else Warning.copy(alpha=0.1f)
                                     ) {
                                         Text(
-                                            (candidate.status ?: "Pending").uppercase(), 
+                                            (candidate.status ?: "SUBMITTED").uppercase(), 
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = if(candidate.status == "approved") Success else Warning,
+                                            color = if(candidate.status == "ACCEPTED") Success else Warning,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                                             fontWeight = FontWeight.Black,
                                             letterSpacing = 1.sp
@@ -271,24 +278,12 @@ fun AdminHomeScreen(navController: NavController) {
                                     }
                                 }
 
-                                // Action Buttons (Compact)
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    FilledIconButton(
-                                        onClick = { viewModel.approveCandidate(candidate.id ?: "") },
-                                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = SoftGreen),
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(painter = painterResource(android.R.drawable.ic_input_add), contentDescription = "Approve", tint = Color.White) // Should ideally be check
-                                    }
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    FilledIconButton(
-                                        onClick = { viewModel.rejectCandidate(candidate.id ?: "") },
-                                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.error),
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(painter = painterResource(android.R.drawable.ic_delete), contentDescription = "Reject", tint = Color.White)
-                                    }
-                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Review",
+                                    tint = TextSecondary,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                         }
                     }
@@ -297,47 +292,30 @@ fun AdminHomeScreen(navController: NavController) {
         }
     }
 
-    // Detail dialog
-    showDetailFor?.let { cand ->
+    // Delete Confirmation Dialog
+    showDeleteDialogFor?.let { cand ->
         AlertDialog(
-            onDismissRequest = { showDetailFor = null },
-            containerColor = SurfaceLight,
-            title = { 
-                Text(
-                    (cand.name ?: "Candidate Details").uppercase(), 
-                    style = MaterialTheme.typography.titleLarge, 
-                    color = TextPrimary, 
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                ) 
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DetailRow("Position", cand.position ?: "N/A")
-                    DetailRow("Role", cand.role ?: "N/A")
-                    Text("Manifesto:", style = MaterialTheme.typography.labelMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
-                    Text(cand.manifesto ?: "No manifesto provided.", style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
-                    
-                    Spacer(Modifier.height(8.dp))
-                    Text("Current Status: ${(cand.status ?: "Pending").uppercase()}", color = Secondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
-                }
-            },
+            onDismissRequest = { showDeleteDialogFor = null },
+            title = { Text("Delete Request", fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to delete the candidate request for ${cand.name}? This will reset their role to student.") },
             confirmButton = {
                 Button(
-                    onClick = { viewModel.approveCandidate(cand.id ?: ""); showDetailFor = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Success),
-                    shape = RoundedCornerShape(12.dp)
+                    onClick = { 
+                        viewModel.deleteCandidate(cand.id ?: "")
+                        showDeleteDialogFor = null 
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("APPROVE", fontWeight = FontWeight.Black)
+                    Text("DELETE", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { viewModel.rejectCandidate(cand.id ?: ""); showDetailFor = null }
-                ) {
-                    Text("REJECT", color = Error, fontWeight = FontWeight.Black)
+                TextButton(onClick = { showDeleteDialogFor = null }) {
+                    Text("CANCEL")
                 }
-            }
+            },
+            containerColor = SurfaceLight,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 }

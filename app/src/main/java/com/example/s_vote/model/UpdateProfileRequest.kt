@@ -10,6 +10,7 @@ data class UpdateProfileRequest(
     @SerializedName("tagline") val tagline: String,
     @SerializedName("goals") val goals: String,
     @SerializedName("pledges") val pledges: String,
+    @SerializedName("symbol_name") val symbolName: String,
     @SerializedName("photo") val photo: String?,
     @SerializedName("symbol") val symbol: String?
 )

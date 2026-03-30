@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 @Suppress("UnstableApiUsage")
@@ -74,7 +75,7 @@ dependencies {
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // Lifecycletu fecycle-runtime-compose:2.6.2")
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     
     // Splash Screen
@@ -93,5 +94,9 @@ dependencies {
     implementation("com.github.yalantis:ucrop:2.2.8")
     implementation("androidx.appcompat:appcompat:1.6.1")
 
-
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
+    implementation("nl.dionsegijn:konfetti-compose:2.0.4")
 }

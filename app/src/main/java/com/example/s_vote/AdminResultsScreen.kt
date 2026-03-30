@@ -1,95 +1,72 @@
 package com.example.s_vote
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MilitaryTech
+import androidx.compose.material.icons.filled.Publish
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.runtime.remember
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.example.s_vote.ui.theme.*
-
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.SubcomposeAsyncImage
+import com.example.s_vote.model.ElectionResult
+import com.example.s_vote.ui.theme.*
 import com.example.s_vote.viewmodel.AdminViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.material.icons.filled.Publish
-import androidx.compose.runtime.DisposableEffect
-
-// Locally used UI model to hold calculated percentage
-data class UiElectionResult(
-    val position: String,
-    val candidate: String,
-    val candidateImage: Int,
-    val votes: Int,
-    val percentage: Float
-)
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminResultsScreen(navController: NavController) {
+fun AdminResultsScreen(navController: NavController, electionId: String) {
     val viewModel: AdminViewModel = viewModel()
     val rawResults by viewModel.results.collectAsState()
-    
-    DisposableEffect(Unit) {
-        viewModel.startPolling()
-        onDispose { viewModel.stopPolling() }
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(electionId) {
+        viewModel.fetchResults(electionId)
     }
 
-    // Process raw results into UI model with percentages
-    val groupedResults = rawResults.groupBy { it.position }
-    val uiResults = remember(rawResults) {
-        rawResults.map { result ->
-            val totalVotesForPos = groupedResults[result.position]?.sumOf { it.voteCount.toIntOrNull() ?: 0 } ?: 0
-            val votes = result.voteCount.toIntOrNull() ?: 0
-            val percentage = if (totalVotesForPos > 0) (votes.toFloat() / totalVotesForPos) * 100 else 0f
-            
-            UiElectionResult(
-                position = result.position,
-                candidate = result.name,
-                candidateImage = R.drawable.ic_launcher_foreground, // Placeholder
-                votes = votes,
-                percentage = percentage
-            )
-        }.sortedByDescending { it.percentage }
+    // Process and Group Results by Position
+    val groupedByPosition = remember(rawResults) {
+        rawResults.groupBy { it.position }.mapValues { entry ->
+            val totalVotesForPos = entry.value.sumOf { it.voteCount.toIntOrNull() ?: 0 }
+            entry.value.map { result ->
+                val votes = result.voteCount.toIntOrNull() ?: 0
+                val percentage = if (totalVotesForPos > 0) (votes.toFloat() / totalVotesForPos) * 100f else 0f
+                result to percentage
+            }.sortedByDescending { it.first.voteCount.toIntOrNull() ?: 0 }
+        }
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "ELECTION RESULTS",
-                        style = MaterialTheme.typography.titleMedium,
+                        "ELECTION RESULTS", 
+                        style = MaterialTheme.typography.titleMedium, 
                         fontWeight = FontWeight.Black,
                         letterSpacing = 2.sp
                     ) 
@@ -99,199 +76,208 @@ fun AdminResultsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                actions = {
+                    IconButton(onClick = { viewModel.fetchResults(electionId) }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Primary)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = BackgroundLight,
                     titleContentColor = TextPrimary
                 )
             )
-            
         },
         bottomBar = {
-            BottomAppBar(
-                containerColor = SurfaceLight,
-                contentPadding = PaddingValues(16.dp),
+            Surface(
+                color = Primary.copy(alpha = 0.05f),
                 tonalElevation = 0.dp
             ) {
                 Button(
                     onClick = { viewModel.publishResults() },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary
-                    ),
-                    shape = RoundedCornerShape(28.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 20.dp)
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    shape = RoundedCornerShape(30.dp)
                 ) {
-                    Icon(Icons.Default.Publish, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Icon(Icons.Default.Publish, contentDescription = null)
+                    Spacer(Modifier.width(12.dp))
                     Text(
-                        "APPROVE & PUBLISH RESULTS", 
+                        "APPROVE & PUBLISH",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
                 }
             }
-        }
+        },
+        containerColor = BackgroundLight
     ) { padding ->
-
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(BackgroundLight)
-                .padding(12.dp)
-        ) {
-
-            // ---------- HEADER ----------
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(SurfaceLight)
-                    .padding(12.dp)
-            ) {
-                Text("Position", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1.2f), style = MaterialTheme.typography.labelSmall)
-                Text("Candidate", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1.8f), style = MaterialTheme.typography.labelSmall)
-                Text("Votes", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
-                Text("Result", fontWeight = FontWeight.Black, color = TextPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
+        if (isLoading && rawResults.isEmpty()) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                // Live Indicator
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                        val alpha by infiniteTransition.animateFloat(
+                            initialValue = 0.3f,
+                            targetValue = 1f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(1000),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "alpha"
+                        )
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Success.copy(alpha = alpha))
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "LIVE ELECTION UPDATES - REAL TIME",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Success,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
 
-            Spacer(Modifier.height(8.dp))
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(uiResults) { result ->
-                    AnimatedResultRow(result)
+                // RESULTS BY POSITION
+                groupedByPosition.forEach { (position, results) ->
+                    item {
+                        Spacer(Modifier.height(24.dp))
+                        Text(
+                            position.uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = Primary,
+                            letterSpacing = 2.sp,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
+                    
+                    itemsIndexed(results) { index, (result, percentage) ->
+                        LeaderboardCard(index + 1, result, percentage)
+                    }
                 }
             }
         }
     }
 }
 
+
+
 @Composable
-fun AnimatedResultRow(result: UiElectionResult) {
-
-    // WINNER highlight
-    val isWinner = result.percentage > 50
-
-    // Winner Highlighting
-    val winnerBrush = Brush.horizontalGradient(
-        colors = listOf(
-            Success.copy(alpha = 0.15f),
-            Primary.copy(alpha = 0.1f)
-        )
-    )
-
-    // Animate row entry
-    val alphaAnim by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(800)
-    )
-
-    val animatedPercent by animateFloatAsState(
-        targetValue = result.percentage,
-        animationSpec = tween(1000)
-    )
-
-    val animatedVotes by animateIntAsState(
-        targetValue = result.votes,
-        animationSpec = tween(1000)
-    )
-
-    // Background: Surfaced slate for everyone, extra glow for winning
-    val bgModifier = if (isWinner) {
-        Modifier
-            .background(winnerBrush, RoundedCornerShape(24.dp))
-            .border(1.dp, Success, RoundedCornerShape(24.dp))
-    } else {
-        Modifier
-            .background(SurfaceLight, RoundedCornerShape(24.dp))
-            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
-    }
-
-    Column(
+fun LeaderboardCard(rank: Int, result: ElectionResult, percentage: Float) {
+    val isLeading = rank == 1
+    
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .then(bgModifier)
-            .padding(14.dp)
-            .alpha(alphaAnim)
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = SurfaceLight,
+        border = BorderStroke(1.dp, if (isLeading) Success.copy(alpha = 0.5f) else OutlineColor)
     ) {
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            // Candidate Photo
-            Image(
-                painter = painterResource(id = result.candidateImage),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(55.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(Modifier.weight(1.8f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Rank Circle
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, if (isLeading) Success.copy(alpha = 0.3f) else OutlineColor, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = result.position.uppercase(),
+                        "#$rank",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        color = if (isWinner) Success else Primary,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isLeading) Success else TextSecondary
+                    )
+                }
+                
+                Spacer(Modifier.width(12.dp))
+                
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        result.position.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Primary,
                         letterSpacing = 1.sp
                     )
-
-                    if (isWinner) {
-                        Spacer(Modifier.width(6.dp))
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_crown),
-                            contentDescription = "Winner",
-                            tint = Success,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                    Text(
+                        result.name.uppercase(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        color = TextPrimary
+                    )
                 }
-
-                Text(
-                    result.candidate.uppercase(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Black,
-                    color = TextPrimary
-                )
+                
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        "${result.voteCount} VOTES",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
+                        color = TextPrimary
+                    )
+                    Text(
+                        "${percentage.toInt()}% Share",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isLeading) Success else TextSecondary
+                    )
+                }
             }
-
-            // Votes
-            Text(
-                "$animatedVotes",
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black,
-                color = TextPrimary
-            )
-
-            // Percentage
-            Text(
-                "%.1f%%".format(animatedPercent),
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black,
-                color = if (isWinner) Success else Primary
+            
+            if (isLeading) {
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Success, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "LEADING",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = Success,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            
+            // Modern Progress Bar
+            LinearProgressIndicator(
+                progress = percentage / 100f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
+                color = if (isLeading) Success else Primary,
+                trackColor = BackgroundLight
             )
         }
-
-        Spacer(Modifier.height(10.dp))
-
-        // Progress Bar
-        LinearProgressIndicator(
-            progress = animatedPercent / 100f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            trackColor = BackgroundLight,
-            color = if (isWinner) Success else Primary
-        )
     }
 }

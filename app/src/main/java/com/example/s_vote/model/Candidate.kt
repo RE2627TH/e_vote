@@ -9,7 +9,7 @@ data class Candidate(
     @SerializedName("position") val position: String? = null,
     @SerializedName("manifesto") val manifesto: String? = null,
     @SerializedName("role") val role: String? = null,
-    @SerializedName("status") val status: String? = "approved", // Default or from API
+    @SerializedName("status") val status: String? = "SUBMITTED", // Default to SUBMITTED
     @SerializedName("rejection_reason") val rejectionReason: String? = null,
     // API Fields
     @SerializedName("photo") val photo: String? = null,
@@ -19,6 +19,7 @@ data class Candidate(
     @SerializedName("tagline") val tagline: String? = null,
     @SerializedName("goals") val goals: String? = null,
     @SerializedName("pledges") val pledges: String? = null,
+    @SerializedName("symbol_name") val symbolName: String? = null,
     
     // UI specific fields (can be mapped or computed)
     // UI specific fields (can be mapped or computed)

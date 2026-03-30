@@ -22,6 +22,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import com.example.s_vote.navigation.Routes
@@ -46,11 +47,41 @@ fun SplashScreen(navController: NavController) {
     )
 
     // start the animation and then wait -> navigate
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+
     LaunchedEffect(Unit) {
         startAnim = true
         delay(2500)
-        navController.navigate(Routes.LOGIN) {
-            popUpTo(Routes.SPLASH) { inclusive = true }
+        
+        if (sessionManager.isLoggedIn()) {
+            // Re-init Retrofit with the saved token
+            com.example.s_vote.api.RetrofitInstance.init(context)
+
+            val role = sessionManager.getUserRole()?.lowercase() ?: ""
+            val userId = sessionManager.getUserId() ?: ""
+            
+            when {
+                role == "admin" -> {
+                    navController.navigate(Routes.ADMIN_HOME) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+                role == "candidate" -> {
+                    navController.navigate("candidate_dashboard/$userId") {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+                else -> { // Student or User
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+            }
+        } else {
+            navController.navigate(Routes.LOGIN) {
+                popUpTo(Routes.SPLASH) { inclusive = true }
+            }
         }
     }
 

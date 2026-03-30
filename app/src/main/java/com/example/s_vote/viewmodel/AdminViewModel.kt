@@ -1,7 +1,9 @@
 package com.example.s_vote.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.s_vote.SessionManager
 import com.example.s_vote.api.RetrofitInstance
 import com.example.s_vote.model.Candidate
 import com.example.s_vote.model.CreateElectionRequest
@@ -9,11 +11,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AdminViewModel : ViewModel() {
+class AdminViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Candidates List
-    private val _pendingCandidates = MutableStateFlow<List<Candidate>>(emptyList())
-    val pendingCandidates = _pendingCandidates.asStateFlow()
+    private val sessionManager = SessionManager(application)
+
+    // For Candidate Review (Pending Approvals)
+    private val _candidateReviewList = MutableStateFlow<List<Candidate>>(emptyList())
+    val candidateReviewList = _candidateReviewList.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -23,6 +27,18 @@ class AdminViewModel : ViewModel() {
 
     private val _dashboardStats = MutableStateFlow<com.example.s_vote.model.AdminDashboardStats?>(null)
     val dashboardStats = _dashboardStats.asStateFlow()
+
+    // Students List
+    private val _students = MutableStateFlow<List<com.example.s_vote.model.AppUser>>(emptyList())
+    val students = _students.asStateFlow()
+
+    // For Candidate Management (All Candidate Users)
+    private val _candidateUserList = MutableStateFlow<List<com.example.s_vote.model.AppUser>>(emptyList())
+    val candidateUserList = _candidateUserList.asStateFlow()
+
+    // Elections List
+    private val _elections = MutableStateFlow<List<com.example.s_vote.ElectionStatus>>(emptyList())
+    val elections = _elections.asStateFlow()
 
     private var lastMessageTime = 0L
 
@@ -50,19 +66,19 @@ class AdminViewModel : ViewModel() {
         }
     }
 
-    fun fetchPendingCandidates() {
+    fun fetchCandidateReviewList() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Assuming getCandidates supports status query param
-                val response = RetrofitInstance.api.getCandidatesByStatus("pending")
+                // Fetch all candidates regardless of status
+                val response = RetrofitInstance.api.getCandidatesByStatus("ALL")
                 if (response.isSuccessful && response.body() != null) {
                     val list = response.body()!!
-                    android.util.Log.d("AdminVM", "Loaded ${list.size} pending candidates")
-                    _pendingCandidates.value = list
+                    android.util.Log.d("AdminVM", "Loaded ${list.size} candidates")
+                    _candidateReviewList.value = list
                 } else {
                     android.util.Log.e("AdminVM", "Failed to load: ${response.code()}")
-                    setMessage("Failed to load pending candidates")
+                    setMessage("Failed to load candidates")
                 }
             } catch (e: Exception) {
                 setMessage("Error: ${e.message}")
@@ -80,6 +96,10 @@ class AdminViewModel : ViewModel() {
         manageCandidate(userId, "reject")
     }
 
+    fun deleteCandidate(userId: String) {
+        manageCandidate(userId, "delete")
+    }
+
     private fun manageCandidate(userId: String, action: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -87,7 +107,7 @@ class AdminViewModel : ViewModel() {
                 val response = RetrofitInstance.api.manageCandidate(userId, action)
                 if (response.isSuccessful && response.body()?.success == true) {
                     setMessage("Candidate ${action}d successfully")
-                    fetchPendingCandidates() // Refresh list
+                    fetchCandidateReviewList() // Refresh list
                 } else {
                     setMessage("Failed to $action candidate")
                 }
@@ -118,19 +138,78 @@ class AdminViewModel : ViewModel() {
         }
     }
     
+    fun updateElectionStatus(electionId: String, status: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = mapOf("election_id" to electionId, "status" to status)
+                val response = RetrofitInstance.api.updateElectionStatus(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    setMessage("Status updated to $status")
+                    fetchElections() // Refresh list
+                } else {
+                    setMessage("Failed to update status")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    fun deleteElection(electionId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = mapOf("election_id" to electionId)
+                val response = RetrofitInstance.api.deleteElection(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    setMessage("Election deleted successfully")
+                    fetchElections() // Refresh list
+                } else {
+                    setMessage("Failed to delete election")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
     // Results
     private val _results = MutableStateFlow<List<com.example.s_vote.model.ElectionResult>>(emptyList())
     val results = _results.asStateFlow()
 
-    fun fetchResults() {
+    fun fetchResults(electionId: String? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = RetrofitInstance.api.getResults()
+                val userId = sessionManager.getUserId() ?: ""
+                val response = RetrofitInstance.api.getResults(userId, electionId)
                 if (response.isSuccessful && response.body() != null) {
                     _results.value = response.body()!!
                 } else {
                     setMessage("Failed to load results")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchElections() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.api.getElections()
+                if (response.isSuccessful && response.body() != null) {
+                    _elections.value = response.body()!!
+                } else {
+                    setMessage("Failed to load elections")
                 }
             } catch (e: Exception) {
                 setMessage("Error: ${e.message}")
@@ -157,6 +236,84 @@ class AdminViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchStudents() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.api.getStudents()
+                if (response.isSuccessful && response.body() != null) {
+                    _students.value = response.body()!!
+                } else {
+                    setMessage("Failed to load students")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchCandidateUserList() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.api.getCandidateUsers()
+                if (response.isSuccessful && response.body() != null) {
+                    _candidateUserList.value = response.body()!!
+                } else {
+                    setMessage("Failed to load candidates")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // Selected Student Detail
+    private val _selectedStudent = MutableStateFlow<com.example.s_vote.model.ProfileResponse?>(null)
+    val selectedStudent = _selectedStudent.asStateFlow()
+
+    fun fetchStudentDetail(userId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.api.getProfile(userId)
+                if (response.isSuccessful && response.body() != null) {
+                    _selectedStudent.value = response.body()
+                } else {
+                    setMessage("Failed to load student details")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteStudent(userId: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = mapOf("user_id" to userId)
+                val response = RetrofitInstance.api.deleteUser(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    setMessage("Student deleted successfully")
+                    onSuccess()
+                } else {
+                    setMessage(response.body()?.message ?: "Failed to delete student")
+                }
+            } catch (e: Exception) {
+                setMessage("Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
     
     fun clearMessage() {
         _message.value = null
@@ -170,7 +327,7 @@ class AdminViewModel : ViewModel() {
         job = viewModelScope.launch {
             while (true) {
                 fetchDashboardStats()
-                fetchResults()
+                // fetchResults() // Removed from global polling as it now depends on ID
                 kotlinx.coroutines.delay(5000) // Poll every 5 seconds
             }
         }

@@ -25,36 +25,43 @@ class CandidateApplicationViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // Added email and phone parameters to match the screen call
-    fun submitApplication(name: String, dob: String, studentId: String, email: String, phone: String, department: String, position: String, manifesto: String) {
+    fun submitApplication(
+        userId: String,
+        name: String,
+        studentId: String,
+        position: String,
+        manifesto: String,
+        course: String,
+        college: String,
+        goals: String,
+        pledges: String,
+        symbolName: String,
+        photo: String?,
+        symbol: String?
+    ) {
         _isLoading.value = true
         _errorMessage.value = null
-
-        // Use userId "1" for testing if not available
-        val userId = "1"
 
         val request = CandidateApplicationRequest(
             userId = userId,
             name = name,
-            dob = dob,
             studentId = studentId,
-            email = email,     // Added
-            phone = phone,     // Added
-            department = department,
             position = position,
-            manifesto = manifesto
+            manifesto = manifesto,
+            course = course,
+            college = college,
+            goals = goals,
+            pledges = pledges,
+            symbolName = symbolName,
+            photo = photo,
+            symbol = symbol
         )
 
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.submitApplication(request)
                 if (response.isSuccessful && response.body() != null) {
-                    val generic = response.body()!!
-                    _applicationResponse.value = CandidateApplicationResponse(
-                        success = generic.success,
-                        message = generic.message,
-                        applicationId = "123" // Changed Int to String to match your error
-                    )
+                    _applicationResponse.value = response.body()
                 } else {
                     _errorMessage.value = "Submission Failed"
                 }
@@ -67,6 +74,6 @@ class CandidateApplicationViewModel : ViewModel() {
     }
 
     fun checkApplicationStatusById(appId: Int) {
-        // Implementation for status check
+        // Implementation for status check can be added if API is defined
     }
 }

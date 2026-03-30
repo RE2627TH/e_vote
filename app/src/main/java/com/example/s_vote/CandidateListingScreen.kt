@@ -34,18 +34,23 @@ import com.example.s_vote.navigation.Routes
 import coil.compose.AsyncImage
 import com.example.s_vote.api.ApiClient
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CandidateListingScreen(navController: NavController, roleName: String) {
 
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val currentUserId = sessionManager.getUserId()
+
     val viewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val candidates by viewModel.candidates.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchCandidates()
+    LaunchedEffect(roleName) {
+        viewModel.fetchCandidates(roleName)
     }
 
     val backgroundGradient = Brush.verticalGradient(
@@ -82,9 +87,6 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                 )
             )
         },
-        bottomBar = {
-            BottomNavBar(navController = navController, selectedRoute = Routes.POLL_HISTORY)
-        },
         containerColor = BackgroundLight
     ) { padding ->
 
@@ -114,10 +116,13 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                     }
                 } else {
                     val filteredCandidates = candidates.filter {
-                        val isApproved = it.status.equals("approved", ignoreCase = true)
-                        val matchesRole = (it.position ?: "").lowercase().replace(" ", "_") == roleName.lowercase() ||
-                                (it.role ?: "").lowercase() == roleName.lowercase()
-                        isApproved && matchesRole
+                        // Support both casing styles just in case
+                        val isAccepted = it.status.equals("ACCEPTED", ignoreCase = true) || 
+                                         it.status.equals("approved", ignoreCase = true)
+                        // Exclude the candidate themselves from the list
+                        val isNotMe = it.id != currentUserId
+                        
+                        isAccepted && isNotMe
                     }
 
                     LazyColumn(
@@ -194,9 +199,9 @@ fun CandidateListingScreen(navController: NavController, roleName: String) {
                             CandidateCardPremium(
                                 candidate = candidate,
                                 onClick = {
-                                    val safeId = candidate.id ?: ""
-                                    if (safeId.isNotEmpty()) {
-                                        navController.navigate(Routes.CANDIDATE_DETAIL.replace("{id}", safeId))
+                                    val safeId = candidate.id
+                                    if (!safeId.isNullOrEmpty()) {
+                                        navController.navigate("candidate_detail/$safeId")
                                     }
                                 }
                             )
@@ -266,14 +271,21 @@ fun CandidateCardPremium(candidate: com.example.s_vote.model.Candidate, onClick:
                     val symbolUrl = candidate.symbolUrl?.let {
                         if (it.startsWith("http")) it else "${ApiClient.BASE_URL}$it"
                     }
-                    AsyncImage(
-                        model = symbolUrl ?: candidate.symbolResId ?: Icons.Default.CheckCircle,
-                        contentDescription = "Symbol",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = if (candidate.symbolUrl == null && candidate.symbolResId == null)
-                            ColorFilter.tint(Color.White) else null
-                    )
+                    if (symbolUrl != null || candidate.symbolResId != null) {
+                        AsyncImage(
+                            model = symbolUrl ?: candidate.symbolResId,
+                            contentDescription = "Symbol",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Symbol",
+                            modifier = Modifier.fillMaxSize(),
+                            tint = Color.White
+                        )
+                    }
                 }
             }
 

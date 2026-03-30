@@ -38,10 +38,16 @@ fun VoteConfirmationScreen(
     studentId: String
 ) {
     val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val userId = sessionManager.getUserId() ?: ""
+    
     val voteViewModel: com.example.s_vote.viewmodel.VoteViewModel = viewModel()
     val voteState by voteViewModel.voteState.collectAsState()
-    val sharedPref = context.getSharedPreferences("s_vote_prefs", android.content.Context.MODE_PRIVATE)
-    val userId = sharedPref.getString("USER_ID", "") ?: ""
+    
+    // Verification States moved to top level
+    var currentUserStudentId by remember { mutableStateOf<String?>(null) }
+    var isProfileLoading by remember { mutableStateOf(false) }
+    var fetchError by remember { mutableStateOf<String?>(null) }
 
     val candidateViewModel: com.example.s_vote.viewmodel.CandidateViewModel = viewModel()
     val candidates by candidateViewModel.candidates.collectAsState()
@@ -55,27 +61,27 @@ fun VoteConfirmationScreen(
     val candidate = candidates.find { it.id == candidateId }
     val candidateName = candidate?.name ?: "Loading..."
 
-    var currentUserStudentId by remember { mutableStateOf<String?>(null) }
-    var isProfileLoading by remember { mutableStateOf(true) }
-    var fetchError by remember { mutableStateOf<String?>(null) }
-
     LaunchedEffect(userId) {
-        if (userId.isNotEmpty()) {
+        if (userId.isNotEmpty() && currentUserStudentId == null) {
+            isProfileLoading = true
+            fetchError = null
             try {
                 val response = com.example.s_vote.api.RetrofitInstance.api.getProfile(userId)
                 if (response.isSuccessful && response.body() != null) {
                     currentUserStudentId = response.body()!!.user.studentId
+                    android.util.Log.d("VOTE_CONFIRM", "Fetched: $currentUserStudentId")
                 } else {
-                    fetchError = "Profile fetch failed"
+                    fetchError = "Session validation failed"
                 }
             } catch (e: Exception) {
-                fetchError = "Verification error"
+                fetchError = "Network error"
+                android.util.Log.e("VOTE_CONFIRM", "Error", e)
             } finally {
                 isProfileLoading = false
             }
-        } else {
+        } else if (userId.isEmpty()) {
              isProfileLoading = false
-             fetchError = "Not logged in"
+             fetchError = "No active session"
         }
     }
 
@@ -220,11 +226,11 @@ fun VoteConfirmationScreen(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 if (isProfileLoading) {
-                    CircularProgressIndicator(color = Color.White)
-                    Text("Securing Session...", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp))
+                    CircularProgressIndicator(color = Primary, modifier = Modifier.size(32.dp))
+                    Text("Securing Session...", color = TextSecondary, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
                 } else if (fetchError != null) {
-                    Text("SECURITY ERROR", color = Color.Red, fontWeight = FontWeight.Black, fontSize = 14.sp)
-                    Text(fetchError!!, color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
+                    Text("SECURITY ERROR", color = Color.Red, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+                    Text(fetchError!!, color = TextSecondary, style = MaterialTheme.typography.bodySmall)
                 } else if (isMatched) {
                     Text(
                         "You are authorized for this action.",

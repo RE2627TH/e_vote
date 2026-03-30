@@ -27,6 +27,26 @@ interface ApiService {
         @Body request: ResetPasswordRequest
     ): Response<GenericResponse>
 
+    @POST("update_subscription.php")
+    suspend fun updateSubscription(
+        @Body request: SubscriptionRequest
+    ): Response<GenericResponse>
+
+    @POST("send_otp.php")
+    suspend fun sendOtp(
+        @Body request: SendOtpRequest
+    ): Response<GenericResponse>
+
+    @POST("verify_otp.php")
+    suspend fun verifyOtp(
+        @Body request: VerifyOtpRequest
+    ): Response<GenericResponse>
+
+    @POST("complete_profile_setup.php")
+    suspend fun completeProfileSetup(
+        @Body request: ProfileSetupRequest
+    ): Response<GenericResponse>
+
 
     /* =======================
        2. CANDIDATE
@@ -84,7 +104,7 @@ interface ApiService {
        ======================= */
 
     @GET("get_candidates.php")
-    suspend fun getCandidates(): Response<List<Candidate>>
+    suspend fun getCandidateList(): Response<List<Candidate>>
 
     // ✅ IMPORTANT: Profile uses ProfileResponse (NOT LoginResponse)
     @GET("get_profile.php")
@@ -104,7 +124,8 @@ interface ApiService {
 
     @GET("get_candidates.php")
     suspend fun getCandidatesByStatus(
-        @Query("status") status: String
+        @Query("status") status: String,
+        @Query("position") position: String = "ALL"
     ): Response<List<Candidate>>
 
     @GET("admin_approve.php")
@@ -114,11 +135,27 @@ interface ApiService {
     ): Response<GenericResponse>
 
     @GET("get_results.php")
-    suspend fun getResults(): Response<List<ElectionResult>>
+    suspend fun getResults(
+        @Query("user_id") userId: String,
+        @Query("election_id") electionId: String? = null
+    ): Response<List<ElectionResult>>
+
+    @GET("get_elections.php")
+    suspend fun getElections(): Response<List<ElectionStatus>>
 
     @POST("create_election.php")
     suspend fun createElection(
         @Body request: CreateElectionRequest
+    ): Response<GenericResponse>
+
+    @POST("update_election_status.php")
+    suspend fun updateElectionStatus(
+        @Body request: Map<String, String>
+    ): Response<GenericResponse>
+
+    @POST("delete_election.php")
+    suspend fun deleteElection(
+        @Body request: Map<String, String>
     ): Response<GenericResponse>
 
     @POST("publish_results.php")
@@ -129,6 +166,27 @@ interface ApiService {
 
     @GET("dashboard_stats.php")
     suspend fun getDashboardStats(): Response<AdminDashboardStatsResponse>
+
+    @GET("get_students.php")
+    suspend fun getStudents(): Response<List<AppUser>>
+
+    @GET("get_candidates.php")
+    suspend fun getCandidateUsers(): Response<List<AppUser>>
+
+    @POST("delete_student.php")
+    suspend fun deleteUser(
+        @Body request: Map<String, String>
+    ): Response<GenericResponse>
+
+    @POST("update_fcm_token.php")
+    suspend fun updateFcmToken(
+        @Body request: Map<String, String>
+    ): Response<GenericResponse>
+
+    @GET("get_notifications.php")
+    suspend fun getNotifications(
+        @Query("user_id") userId: String
+    ): Response<com.example.s_vote.model.NotificationResponse>
 
     /* =======================
        7. OCR (PYTHON SERVER)

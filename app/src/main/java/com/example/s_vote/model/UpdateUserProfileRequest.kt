@@ -9,5 +9,6 @@ data class UpdateUserProfileRequest(
     @SerializedName("dob") val dob: String,
     @SerializedName("email") val email: String,
     @SerializedName("student_id") val studentId: String,
-    @SerializedName("college") val college: String
+    @SerializedName("college") val college: String,
+    @SerializedName("profile_photo") val profilePhoto: String? = null
 )

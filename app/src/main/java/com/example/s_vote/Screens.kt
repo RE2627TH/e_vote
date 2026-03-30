@@ -31,7 +31,13 @@ fun BottomNavBar(navController: NavController, selectedRoute: String) {
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
             label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.HOME,
-            onClick = { navController.navigate(Routes.HOME) },
+            onClick = { 
+                navController.navigate(Routes.HOME) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = Primary,
                 selectedTextColor = Primary,
@@ -44,7 +50,13 @@ fun BottomNavBar(navController: NavController, selectedRoute: String) {
             icon = { Icon(Icons.Default.Poll, contentDescription = null) },
             label = { Text("Result", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.RESULT,
-            onClick = { navController.navigate(Routes.RESULT) },
+            onClick = { 
+                navController.navigate(Routes.RESULT) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = Primary,
                 selectedTextColor = Primary,
@@ -57,7 +69,13 @@ fun BottomNavBar(navController: NavController, selectedRoute: String) {
             icon = { Icon(Icons.Default.History, contentDescription = null) },
             label = { Text("History", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.POLL_HISTORY,
-            onClick = { navController.navigate(Routes.POLL_HISTORY) },
+            onClick = { 
+                navController.navigate(Routes.POLL_HISTORY) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = Primary,
                 selectedTextColor = Primary,
@@ -70,7 +88,13 @@ fun BottomNavBar(navController: NavController, selectedRoute: String) {
             icon = { Icon(Icons.Default.Person, contentDescription = null) },
             label = { Text("Profile", style = MaterialTheme.typography.labelSmall) },
             selected = selectedRoute == Routes.PROFILE,
-            onClick = { navController.navigate(Routes.PROFILE) },
+            onClick = { 
+                navController.navigate(Routes.PROFILE) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = Primary,
                 selectedTextColor = Primary,

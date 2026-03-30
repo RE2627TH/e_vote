@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 // Premium & Deep Professional Palette (Rich Slate & Vivid Indigo)
 val Primary = Color(0xFF6366F1) // Indigo 500 - Interaction Primary
 val PrimaryDark = Color(0xFF4F46E5) // Indigo 600 - High Contrast Interaction
-val Secondary = Color(0xFF818CF8) // Indigo 400 - Modern Accent
+val Secondary = Color(0xFF0012C9) // Indigo 400 - Modern Accent
 val Accent = Color(0xFFC084FC) // Violet 400 - Vivid Highlight
 
 val Success = Color(0xFF10B981) // Emerald 500

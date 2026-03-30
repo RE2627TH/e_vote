@@ -14,22 +14,23 @@ data class Feedback(
 data class RoleItem(val name: String, val icon: Int)
 
 data class ElectionStatus(
-    @SerializedName("id") val id: String = "1",
-    @SerializedName("title") val title: String = "College Election 2025",
+    @SerializedName("id") val id: String = "0",
+    @SerializedName("title") val title: String = "",
     @SerializedName("start_date") val startDate: String? = null,
     @SerializedName("end_date") val endDate: String? = null,
-    val isActive: Boolean = true,
-    @SerializedName("is_published") val isPublished: Boolean = false
+    @SerializedName("status") val status: String = "none", // 'UPCOMING', 'ACTIVE', 'CLOSED', 'none'
+    @SerializedName("is_published") val isPublished: Boolean = false,
+    val isActive: Boolean = false
 )
 
 var currentElection = ElectionStatus()
 
 val roleList = listOf(
-    RoleItem("president", R.drawable.president),
-    RoleItem("vice president", R.drawable.election_day),
-    RoleItem("sports secretary", R.drawable.candidates),
-    RoleItem("cultural secretary", R.drawable.corporate_culture),
-    RoleItem("discipline secretary", R.drawable.election_results),
+    RoleItem("President", R.drawable.president),
+    RoleItem("Vice President", R.drawable.election_day),
+    RoleItem("Sports Secretary", R.drawable.candidates),
+    RoleItem("Cultural Secretary", R.drawable.corporate_culture),
+    RoleItem("Discipline Secretary", R.drawable.election_results),
     RoleItem("Treasurer", R.drawable.election_day)
 )
 

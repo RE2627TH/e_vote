@@ -39,8 +39,8 @@ import com.example.s_vote.ui.theme.*
 fun PollHistoryScreen(navController: NavController) {
 
     val context = LocalContext.current
-    val sharedPref = context.getSharedPreferences("s_vote_prefs", android.content.Context.MODE_PRIVATE)
-    val userId = sharedPref.getString("USER_ID", "") ?: ""
+    val sessionManager = remember { SessionManager(context) }
+    val userId = sessionManager.getUserId() ?: ""
 
     val viewModel: com.example.s_vote.viewmodel.VoteHistoryViewModel = viewModel()
     val historyState by viewModel.historyState.collectAsState()
@@ -52,6 +52,7 @@ fun PollHistoryScreen(navController: NavController) {
     }
 
     Scaffold(
+        bottomBar = { BottomNavBar(navController, selectedRoute = Routes.POLL_HISTORY) },
         topBar = {
             TopAppBar(
                 title = { Text("Your Vote History") },

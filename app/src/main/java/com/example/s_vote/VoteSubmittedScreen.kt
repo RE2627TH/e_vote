@@ -1,5 +1,6 @@
 package com.example.s_vote
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -113,6 +114,25 @@ fun VoteSubmittedScreen(navController: NavController) {
                         "VIEW LIVE RESULTS", 
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { navController.navigate(Routes.POLL_HISTORY) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    border = BorderStroke(1.dp, Primary)
+                ) {
+                    Text(
+                        "VIEW VOTE HISTORY",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Primary,
                         letterSpacing = 1.sp
                     )
                 }

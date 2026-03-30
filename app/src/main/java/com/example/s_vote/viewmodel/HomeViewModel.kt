@@ -18,6 +18,11 @@ class HomeViewModel : ViewModel() {
     private val _electionStatus = MutableStateFlow(ElectionStatus())
     val electionStatus = _electionStatus.asStateFlow()
     
+    private val _allElections = MutableStateFlow<List<ElectionStatus>>(emptyList())
+    val allElections = _allElections.asStateFlow()
+    
+    private var countdownJob: kotlinx.coroutines.Job? = null
+    
     // Countdown state
     private val _countdownDays = MutableStateFlow("00")
     val countdownDays = _countdownDays.asStateFlow()
@@ -31,8 +36,23 @@ class HomeViewModel : ViewModel() {
     private val _countdownSeconds = MutableStateFlow("00")
     val countdownSeconds = _countdownSeconds.asStateFlow()
 
+    private val _countdownLabel = MutableStateFlow("Election Ends in")
+    val countdownLabel = _countdownLabel.asStateFlow()
+
     init {
         fetchActiveElection()
+        fetchAllElections()
+        startAutoRefresh()
+    }
+
+    private fun startAutoRefresh() {
+        viewModelScope.launch {
+            while (true) {
+                delay(5000) // 5 seconds
+                fetchActiveElection()
+                fetchAllElections()
+            }
+        }
     }
 
     private fun fetchActiveElection() {
@@ -40,11 +60,39 @@ class HomeViewModel : ViewModel() {
             try {
                 val response = RetrofitInstance.api.getActiveElection()
                 if (response.isSuccessful && response.body() != null) {
-                    _electionStatus.value = response.body()!!
-                    startCountdown(response.body()!!.endDate)
+                    val election = response.body()!!
+                    _electionStatus.value = election
+                    
+                    if (election.status == "UPCOMING") {
+                        _countdownLabel.value = "Election Starts in"
+                        startCountdown(election.startDate)
+                    } else if (election.status == "ACTIVE") {
+                        _countdownLabel.value = "Election Ends in"
+                        startCountdown(election.endDate)
+                    } else {
+                        _countdownLabel.value = "Election Ended"
+                        _countdownDays.value = "00"
+                        _countdownHours.value = "00"
+                        _countdownMinutes.value = "00"
+                        _countdownSeconds.value = "00"
+                        countdownJob?.cancel()
+                    }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("HomeViewModel", "Error fetching active election: ${e.message}", e)
+            }
+        }
+    }
+
+    fun fetchAllElections() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getElections()
+                if (response.isSuccessful && response.body() != null) {
+                    _allElections.value = response.body()!!
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeViewModel", "Error fetching all elections: ${e.message}", e)
             }
         }
     }
@@ -52,7 +100,8 @@ class HomeViewModel : ViewModel() {
     private fun startCountdown(endDateStr: String?) {
         if (endDateStr == null) return
         
-        viewModelScope.launch {
+        countdownJob?.cancel()
+        countdownJob = viewModelScope.launch {
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             // PHP usually returns time in server timezone. Ideally we sync timezones.
             // Assuming local emulator time matches server or slightly off.

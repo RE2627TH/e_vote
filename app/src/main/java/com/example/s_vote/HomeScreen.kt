@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ fun HomeScreen(navController: NavController) {
     val hours by viewModel.countdownHours.collectAsState()
     val minutes by viewModel.countdownMinutes.collectAsState()
     val seconds by viewModel.countdownSeconds.collectAsState()
+    val countdownLabel by viewModel.countdownLabel.collectAsState()
 
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
@@ -114,51 +116,78 @@ fun HomeScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // ---------- COUNTDOWN ----------
-                Text(
-                    "Election Live Countdown",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary,
-                    letterSpacing = 2.sp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Modern Countdown Card - Deep Professional
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(SurfaceLight)
-                        .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
-                        .padding(24.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                if (electionStatus.status == "ACTIVE" || electionStatus.status == "UPCOMING") {
+                    Text(
+                        countdownLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextSecondary,
+                        letterSpacing = 2.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Modern Countdown Card - Deep Professional
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+                            .padding(24.dp)
                     ) {
-                        Text(
-                            (electionStatus.title ?: "General Election").uppercase(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = TextPrimary,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
-                        )
-                        
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        Row(
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            CountdownBox(days, "DAYS")
-                            CountdownBox(hours, "HOURS")
-                            CountdownBox(minutes, "MINS")
-                            CountdownBox(seconds, "SECS")
+                            Text(
+                                (electionStatus.title ?: "General Election").uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
+                            )
+                            
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CountdownBox(days, "DAYS")
+                                CountdownBox(hours, "HOURS")
+                                CountdownBox(minutes, "MINS")
+                                CountdownBox(seconds, "SECS")
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                // ---------- ELECTIONS SECTION ----------
+                val allElections by viewModel.allElections.collectAsState()
+                
+                if (allElections.isNotEmpty()) {
+                    Text(
+                        "Elections",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextSecondary,
+                        letterSpacing = 2.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    androidx.compose.foundation.lazy.LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(allElections) { election ->
+                            ElectionCard(election) {
+                                // Navigate to ElectionDetailScreen
+                                navController.navigate("election_detail/${election.id}")
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
 
                 // ---------- ROLE SELECTION ----------
                 Text(
@@ -292,6 +321,85 @@ fun InfoCard(emoji: String, title: String, modifier: Modifier = Modifier, onClic
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp
             )
+        }
+    }
+}
+
+@Composable
+fun ElectionCard(election: com.example.s_vote.ElectionStatus, onClick: () -> Unit) {
+    val statusColor = when (election.status) {
+        "ACTIVE" -> Success
+        "UPCOMING" -> Primary
+        else -> TextMuted
+    }
+    
+    val statusLabel = when (election.status) {
+        "ACTIVE" -> "Live"
+        "UPCOMING" -> "Going to Start"
+        else -> "Ended"
+    }
+
+    Box(
+        modifier = Modifier
+            .width(220.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(SurfaceLight)
+            .border(1.dp, OutlineColor, RoundedCornerShape(24.dp))
+            .clickable(onClick = onClick)
+            .padding(20.dp)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(statusColor)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    statusLabel.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = statusColor,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            
+            Text(
+                election.title.uppercase(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black,
+                color = TextPrimary,
+                maxLines = 1
+            )
+            
+            Spacer(Modifier.height(8.dp))
+            
+            Text(
+                if (election.status == "UPCOMING") "Starts: ${election.startDate}" else "Ends: ${election.endDate}",
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (election.status == "ACTIVE") Success.copy(alpha = 0.1f) else Primary.copy(alpha = 0.1f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    if (election.status == "ACTIVE") "VOTE NOW" else "VIEW ELECTION",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = if (election.status == "ACTIVE") Success else Primary,
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

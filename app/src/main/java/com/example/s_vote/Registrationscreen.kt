@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -33,6 +34,7 @@ import com.example.s_vote.R
 import com.example.s_vote.navigation.Routes
 import com.example.s_vote.viewmodel.RegisterState
 import com.example.s_vote.viewmodel.RegisterViewModel
+import com.example.s_vote.viewmodel.OtpState
 import com.example.s_vote.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,21 +49,56 @@ fun RegistrationScreen(navController: NavController) {
     var idNumber by remember { mutableStateOf("") }
     var department by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var otp by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("Student") }
     var expanded by remember { mutableStateOf(false) }
+    
+    // OTP States
+    val otpState by viewModel.otpState.collectAsState()
+    var isVerified by remember { mutableStateOf(false) }
 
     val registerState by viewModel.registerState.collectAsState()
+
+    // Email validation
+    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+    LaunchedEffect(otpState) {
+        when(otpState) {
+            is  OtpState.Sent -> {
+                val sentState = otpState as OtpState.Sent
+                Toast.makeText(context, sentState.message, Toast.LENGTH_LONG).show()
+                if (sentState.devOtp != null) {
+                    otp = sentState.devOtp
+                }
+            }
+            is OtpState.Verified -> {
+                isVerified = true
+                Toast.makeText(context, "Email verified successfully!", Toast.LENGTH_SHORT).show()
+            }
+            is OtpState.Error -> {
+                Toast.makeText(context, (otpState as OtpState.Error).message, Toast.LENGTH_LONG).show()
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(registerState) {
         when(registerState) {
             is RegisterState.Success -> {
-                Toast.makeText(context, "Registration Successful!", Toast.LENGTH_LONG).show()
-                val userId = (registerState as RegisterState.Success).userId
-                if (selectedRole.equals("Candidate", ignoreCase = true) && userId != null) {
-                    navController.navigate("${Routes.CANDIDATE_APPLICATION.replace("{userId}", userId.toString())}")
+                val registeredUserId = (registerState as RegisterState.Success).userId
+                Toast.makeText(context, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                
+                if (selectedRole.equals("Candidate", ignoreCase = true)) {
+                    // Navigate to Candidate Application/Form directly
+                    navController.navigate("candidate_application/$registeredUserId") {
+                        popUpTo(Routes.REGISTRATION) { inclusive = true }
+                    }
                 } else {
-                    navController.navigate(Routes.LOGIN)
+                    // Students go to Login as normal
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.REGISTRATION) { inclusive = true }
+                    }
                 }
                 viewModel.resetState()
             }
@@ -181,7 +218,58 @@ fun RegistrationScreen(navController: NavController) {
                 Spacer(Modifier.height(16.dp))
                 ModernRegTextField(value = department, onValueChange = { department = it }, label = "Department")
                 Spacer(Modifier.height(16.dp))
-                ModernRegTextField(value = email, onValueChange = { email = it }, label = "Official Email")
+                ModernRegTextField(
+                    value = email,
+                    onValueChange = { email = it; isVerified = false },
+                    label = "Official Email",
+                    enabled = !isVerified,
+                    trailingIcon = if (isVerified) {
+                        { Icon(Icons.Default.CheckCircle, null, tint = Color.Green) }
+                    } else null
+                )
+
+                if (!isVerified) {
+                    Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = { viewModel.sendOtp(email) },
+                        modifier = Modifier.fillMaxWidth(0.6f).height(40.dp),
+                        enabled = isEmailValid && otpState !is OtpState.Sending,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Secondary)
+                    ) {
+                        if (otpState is OtpState.Sending) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
+                        } else {
+                            Text("Send Verification Code", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+
+                if (otpState is OtpState.Sent || otpState is OtpState.Verifying) {
+                    Spacer(Modifier.height(16.dp))
+                    ModernRegTextField(
+                        value = otp,
+                        onValueChange = { otp = it },
+                        label = "Enter 6-digit OTP",
+                        enabled = !isVerified
+                    )
+                    if (!isVerified) {
+                        Spacer(Modifier.height(8.dp))
+                        Button(
+                            onClick = { viewModel.verifyOtp(email, otp) },
+                            modifier = Modifier.fillMaxWidth(0.4f).height(40.dp),
+                            enabled = otp.length == 6 && otpState !is OtpState.Verifying,
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                        ) {
+                            if (otpState is OtpState.Verifying) {
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
+                            } else {
+                                Text("Verify", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 ModernRegTextField(value = password, onValueChange = { password = it }, label = "Password", isPassword = true)
 
@@ -244,7 +332,8 @@ fun RegistrationScreen(navController: NavController) {
                         .height(60.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                    enabled = isVerified && registerState !is RegisterState.Loading
                 ) {
                     if (registerState is RegisterState.Loading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

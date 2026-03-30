@@ -1,5 +1,7 @@
 package com.example.s_vote.viewmodel
 
+import com.example.s_vote.SessionManager
+
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -37,22 +39,47 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         val actualRole = result.role?.trim()?.lowercase() ?: ""
                         val intended = intendedRole.trim().lowercase()
 
-                        // Role Verification
-                        // Handle students which might come back as 'student' or 'user' depending on DB
+                        // 1. Check for redirection FIRST (Application incomplete)
+                        if (result.redirect_to_form == true) {
+                             _loginState.value = LoginState.RedirectToForm(result.user_id ?: 0)
+                             return@launch
+                        }
+
+                        // 2. Role Verification
                         val isStudentMatch = (intended == "student" && (actualRole == "student" || actualRole == "user"))
                         val isExactMatch = actualRole == intended
 
                         if (isExactMatch || isStudentMatch) {
-                            // ✅ Save session data only if roles match
-                            val sharedPref = getApplication<Application>()
-                                .getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
+                            // ✅ Save session data using SessionManager
+                            val sessionManager = SessionManager(getApplication())
+                            sessionManager.saveSession(
+                                token = result.token,
+                                userId = result.user_id.toString(),
+                                studentId = result.student_id,
+                                role = result.role,
+                                isSubscribed = result.is_subscribed == 1,
+                                isProfileCompleted = result.is_profile_completed == 1
+                            )
 
-                            sharedPref.edit()
-                                .putString("USER_ID", result.user_id.toString())
-                                .putString("STUDENT_ID", result.student_id)
-                                .putString("USER_ROLE", result.role)
-                                .putBoolean("IS_LOGGED_IN", true)
-                                .apply()
+                            // Re-init Retrofit with the new token
+                            RetrofitInstance.init(getApplication())
+
+                            // 🚨 Fetch and Update FCM Token
+                            com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val token = task.result
+                                    viewModelScope.launch {
+                                        try {
+                                            RetrofitInstance.api.updateFcmToken(mapOf(
+                                                "user_id" to result.user_id.toString(),
+                                                "fcm_token" to token
+                                            ))
+                                        } catch (e: Exception) {
+                                            Log.e("LoginViewModel", "FCM Update failed: ${e.message}")
+                                        }
+                                    }
+                                }
+                            }
 
                             _loginState.value = LoginState.Success(result.role ?: "")
                         } else {
@@ -68,6 +95,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
             } catch (e: Exception) {
+                Log.e("LoginViewModel", "Login error", e)
                 _loginState.value = LoginState.Error("Connection Failed: ${e.message ?: "Unknown error"}")
             }
         }
@@ -88,5 +116,6 @@ sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
     data class Success(val role: String) : LoginState()
+    data class RedirectToForm(val userId: Int) : LoginState()
     data class Error(val message: String) : LoginState()
 }

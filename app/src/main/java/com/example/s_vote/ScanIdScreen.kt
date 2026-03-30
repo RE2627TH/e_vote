@@ -67,11 +67,12 @@ fun ScanIdScreen(navController: NavController, candidateId: String, position: St
 
     // Initialize User Data Check
     LaunchedEffect(Unit) {
-        val sharedPref = context.getSharedPreferences("s_vote_prefs", Context.MODE_PRIVATE)
-        val userId = sharedPref.getString("USER_ID", "") ?: ""
-        val studentId = sharedPref.getString("STUDENT_ID", "") ?: ""
+        val sessionManager = SessionManager(context)
+        val userId = sessionManager.getUserId() ?: ""
+        val studentId = sessionManager.getStudentId() ?: ""
+        val role = sessionManager.getUserRole() ?: ""
         
-        if (userId.isEmpty() || (studentId.isEmpty() && sharedPref.getString("USER_ROLE", "").equals("student", true))) {
+        if (userId.isEmpty() || (studentId.isEmpty() && role.equals("student", true))) {
             Toast.makeText(context, "Session invalid. Please login again.", Toast.LENGTH_LONG).show()
             navController.navigate(Routes.LOGIN) {
                 popUpTo(Routes.HOME) { inclusive = true }
